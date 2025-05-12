@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر الأكواد - تطبيق ويب بملف واحد</title>
+    <style>
+        /* تنسيقات CSS الرئيسية */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        header {
+            text-align: center;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #fff;
+            border-radius: 5px 5px 0 0;
+            overflow: hidden;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            transition: background-color 0.3s;
+        }
+
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .editors {
+            display: flex;
+            flex: 1;
+            gap: 15px;
+        }
+
+        .code-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .editor {
+            display: none;
+            height: 100%;
+            border: none;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: none;
+            background-color: #282c34;
+            color: #abb2bf;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .editor.active {
+            display: block;
+        }
+
+        .preview-header {
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #preview-iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+            background-color: white;
+        }
+
+        .button {
+            padding: 8px 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #27ae60;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .file-action {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-action:hover {
+            background-color: #2980b9;
+        }
+
+        /* تصميم متجاوب */
+        @media (max-width: 768px) {
+            .editors {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>محرر الأكواد - تطبيق ويب بملف واحد</h1>
+        </header>
+
+        <div class="editor-container">
+            <div class="tabs">
+                <div class="tab active" data-target="html">HTML</div>
+                <div class="tab" data-target="css">CSS</div>
+                <div class="tab" data-target="js">JavaScript</div>
+            </div>
+
+            <div class="editors">
+                <div class="code-area">
+                    <textarea id="html-editor" class="editor active" placeholder="اكتب كود HTML هنا...">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;تطبيقي الجديد&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;مرحباً بالعالم!&lt;/h1&gt;
+    &lt;p&gt;هذا هو تطبيقي الأول&lt;/p&gt;
+    &lt;button id="myButton"&gt;انقر هنا&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+                    <textarea id="css-editor" class="editor" placeholder="اكتب كود CSS هنا...">body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    direction: rtl;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}</textarea>
+                    <textarea id="js-editor" class="editor" placeholder="اكتب كود JavaScript هنا...">document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('myButton');
+    
+    button.addEventListener('click', function() {
+        alert('مرحباً! لقد نقرت على الزر!');
+    });
+});</textarea>
+
+                    <div class="actions">
+                        <button id="run-btn" class="button">تشغيل الكود</button>
+                        <button id="save-btn" class="file-action">حفظ الكود</button>
+                        <button id="load-btn" class="file-action">تحميل الكود</button>
+                        <button id="download-btn" class="file-action">تنزيل كملف HTML</button>
+                    </div>
+                </div>
+
+                <div class="preview-area">
+                    <div class="preview-header">
+                        <h3>معاينة</h3>
+                        <button id="refresh-btn" class="button">تحديث</button>
+                    </div>
+                    <iframe id="preview-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحديد العناصر
+        const tabs = document.querySelectorAll('.tab');
+        const editors = document.querySelectorAll('.editor');
+        const htmlEditor = document.getElementById('html-editor');
+        const cssEditor = document.getElementById('css-editor');
+        const jsEditor = document.getElementById('js-editor');
+        const previewIframe = document.getElementById('preview-iframe');
+        const runBtn = document.getElementById('run-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const loadBtn = document.getElementById('load-btn');
+        const downloadBtn = document.getElementById('download-btn');
+
+        // تبديل التبويبات
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // إزالة الكلاس النشط من جميع التبويبات
+                tabs.forEach(t => t.classList.remove('active'));
+                editors.forEach(editor => editor.classList.remove('active'));
+
+                // إضافة الكلاس النشط للتبويب المحدد
+                tab.classList.add('active');
+                const targetEditor = document.getElementById(`${tab.dataset.target}-editor`);
+                targetEditor.classList.add('active');
+            });
+        });
+
+        // تحديث المعاينة
+        function updatePreview() {
+            const html = htmlEditor.value;
+            const css = cssEditor.value;
+            const js = jsEditor.value;
+
+            // تهيئة الإطار
+            const iframe = previewIframe;
+            const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDocument.open();
+            
+            // إنشاء محتوى HTML مع CSS و JavaScript مدمجين
+            const content = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>${css}</style>
+                </head>
+                <body>${html}
+                    <script>${js}<\/script>
+                </body>
+                </html>
+            `;
+            
+            iframeDocument.write(content);
+            iframeDocument.close();
+        }
+
+        // تحديث المعاينة عند النقر على زر التشغيل
+        runBtn.addEventListener('click', updatePreview);
+        refreshBtn.addEventListener('click', updatePreview);
+
+        // تحديث المعاينة عند تحميل الصفحة
+        window.addEventListener('load', updatePreview);
+
+        // حفظ الكود في التخزين المحلي
+        saveBtn.addEventListener('click', () => {
+            const codeData = {
+                html: htmlEditor.value,
+                css: cssEditor.value,
+                js: jsEditor.value
+            };
+            localStorage.setItem('savedCode', JSON.stringify(codeData));
+            alert('تم حفظ الكود بنجاح!');
+        });
+
+        // تحميل الكود من التخزين المحلي
+        loadBtn.addEventListener('click', () => {
+            const savedCode = localStorage.getItem('savedCode');
+            if (savedCode) {
+                const codeData = JSON.parse(savedCode);
+                htmlEditor.value = codeData.html;
+                cssEditor.value = codeData.css;
+                jsEditor.value = codeData.js;
+                updatePreview();
+                alert('تم تحميل الكود بنجاح!');
+            } else {
+                alert('لا يوجد كود محفوظ!');
+            }
+        });
+
+        // تنزيل الكود كملف HTML واحد
+        downloadBtn.addEventListener('click', () => {
+            const html = htmlEditor.value;
+            const css = cssEditor.value;
+            const js = jsEditor.value;
+
+            // إنشاء محتوى الملف
+            const fileContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>تطبيقي</title>
+    <style>
+${css}
+    </style>
+</head>
+<body>
+${html}
+    <script>
+${js}
+    </script>
+</body>
+</html>`;
+
+            // إنشاء رابط التنزيل
+            const blob = new Blob([fileContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'تطبيقي.html';
+            document.body.appendChild(a);
+            a.click();
+            
+            // تنظيف
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        });
+
+        // استعادة الكود المحفوظ عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            const savedCode = localStorage.getItem('savedCode');
+            if (savedCode) {
+                const codeData = JSON.parse(savedCode);
+                htmlEditor.value = codeData.html;
+                cssEditor.value = codeData.css;
+                jsEditor.value = codeData.js;
+                updatePreview();
+            }
+        });
+    </script>
+</body>
+</html>
