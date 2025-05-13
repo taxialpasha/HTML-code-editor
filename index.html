@@ -1,490 +1,1505 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متصفح الملفات</title>
+    <title>محرر الأكواد والخادم المحلي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <style>
-        /* CSS Styles */
+        :root {
+            --primary-color: #2a2f3b;
+            --secondary-color: #1e2129;
+            --accent-color: #3498db;
+            --text-color: #f5f5f5;
+            --sidebar-width: 250px;
+            --header-height: 50px;
+        }
+
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
             display: flex;
+            flex-direction: column;
             height: 100vh;
-            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            margin-right: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
             overflow: hidden;
         }
 
         .sidebar {
-            width: 0;
-            height: 100%;
-            background-color: #2c3e50;
-            transition: width 0.3s ease;
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
             overflow-y: auto;
-            overflow-x: hidden;
-            color: white;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            transition: width 0.3s;
         }
 
-        .sidebar-expanded {
-            width: 250px;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: white;
-            transition: margin-right 0.3s ease;
-        }
-
-        .header {
+        .sidebar-header {
+            padding: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background-color: #3498db;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .file-browser {
+            padding: 10px;
+        }
+
+        .folder, .file {
+            padding: 5px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .folder:hover, .file:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .folder i, .file i {
+            margin-left: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .folder i {
+            color: #f7d143;
+        }
+
+        .html-file i {
+            color: #e44d26;
+        }
+
+        .css-file i {
+            color: #264de4;
+        }
+
+        .js-file i {
+            color: #f7df1e;
+        }
+
+        .folder-content {
+            padding-right: 20px;
+            display: none;
+        }
+
+        .folder.open > .folder-content {
+            display: block;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: var(--primary-color);
+            height: 40px;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 0 15px;
+            line-height: 40px;
+            background-color: var(--primary-color);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .tab.active {
+            background-color: var(--secondary-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .tab i {
+            margin-left: 8px;
+        }
+
+        .tab .close-btn {
+            margin-right: 8px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .tab:hover .close-btn {
+            opacity: 1;
+        }
+
+        .tab .file-type {
+            margin-right: 8px;
+        }
+
+        .editor-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #editor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            font-size: 14px;
+        }
+
+        .preview-container {
+            flex: 1;
+            display: none;
+            overflow: hidden;
+        }
+
+        .preview-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .status-bar {
+            height: 25px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-bar .language {
+            margin-left: 15px;
+        }
+
+        .toggle-sidebar {
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+            border-radius: 3px;
+        }
+
+        .toggle-sidebar:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-collapsed {
+            width: 0;
+        }
+
+        .run-button {
+            background-color: var(--accent-color);
             color: white;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
         }
 
-        .folder-list {
-            padding: 10px;
+        .run-button i {
+            margin-left: 5px;
         }
 
-        .folder-item, .file-item {
-            padding: 10px;
-            margin: 5px 0;
+        .run-button:hover {
+            background-color: #2980b9;
+        }
+
+        .upload-button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-button i {
+            margin-left: 5px;
+        }
+
+        .upload-button:hover {
+            background-color: #2ecc71;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--primary-color);
+            width: 400px;
             border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .modal-button {
+            padding: 8px 15px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .modal-button.primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .modal-button.cancel {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--secondary-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            border-radius: 3px;
+        }
+
+        .form-group input[type="file"] {
+            display: none;
+        }
+
+        .form-group .file-input-label {
+            display: block;
+            padding: 8px;
+            background-color: var(--secondary-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            border-radius: 3px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .context-menu {
+            position: absolute;
+            background-color: var(--primary-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            padding: 5px 0;
+            min-width: 150px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 8px 15px;
             cursor: pointer;
             display: flex;
             align-items: center;
         }
 
-        .folder-item {
-            background-color: #34495e;
+        .context-menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .folder-item:hover, .file-item:hover {
-            opacity: 0.8;
-        }
-
-        .file-item {
-            background-color: #7f8c8d;
-        }
-
-        .folder-item i, .file-item i {
+        .context-menu-item i {
+            width: 20px;
             margin-left: 10px;
         }
 
-        .file-content {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-            min-height: 300px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            margin-top: 20px;
+        /* شريط التمرير مخصص */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
 
-        .file-actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 10px;
-            gap: 10px;
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-color);
         }
 
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #3498db;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        .btn-open {
-            background-color: #2ecc71;
+        /* للأجهزة المحمولة */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                z-index: 50;
+                height: calc(100% - var(--header-height));
+            }
+
+            .sidebar-collapsed {
+                width: 0;
+            }
         }
 
-        .btn-open:hover {
-            background-color: #27ae60;
-        }
-
-        .btn-run {
-            background-color: #e74c3c;
-        }
-
-        .btn-run:hover {
-            background-color: #c0392b;
-        }
-
-        .icon {
-            margin-left: 8px;
-            font-size: 1.2em;
-        }
-
-        .preview-container {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: white;
-            min-height: 300px;
-        }
-
-        .empty-state {
+        /* لوحة المعلومات للملفات المفتوحة */
+        .no-file-opened {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 70vh;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
             text-align: center;
-            color: #7f8c8d;
         }
 
-        .empty-state i {
-            font-size: 5em;
+        .no-file-opened i {
+            font-size: 4rem;
             margin-bottom: 20px;
         }
 
-        /* إضافة أيقونات ومؤثرات بصرية */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .no-file-opened h2 {
+            margin-bottom: 10px;
         }
 
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        /* تصميم متجاوب */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                height: 0;
-                transition: height 0.3s ease;
-            }
-            
-            .sidebar-expanded {
-                width: 100%;
-                height: 250px;
-            }
-            
-            .main-content {
-                margin-right: 0;
-            }
+        .no-file-opened p {
+            max-width: 500px;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <div class="sidebar" id="sidebar">
-        <div class="folder-list" id="folder-list">
-            <!-- هنا سيتم عرض قائمة المجلدات والملفات -->
+    <div class="header">
+        <div class="toggle-sidebar">
+            <i class="fas fa-bars"></i>
+        </div>
+        <h1>محرر الأكواد والخادم المحلي</h1>
+        <button class="run-button">
+            <i class="fas fa-play"></i>
+            تشغيل
+        </button>
+        <button class="upload-button">
+            <i class="fas fa-upload"></i>
+            رفع ملفات
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">مستكشف الملفات</div>
+                <div class="new-file-btn" title="ملف جديد">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </div>
+            <div class="file-browser" id="file-browser">
+                <!-- هنا ستظهر الملفات والمجلدات -->
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="tabs" id="tabs">
+                <!-- الألسنة ستضاف هنا باستخدام جافا سكريبت -->
+            </div>
+
+            <div class="editor-container" id="editor-container">
+                <div class="no-file-opened">
+                    <i class="fas fa-code"></i>
+                    <h2>مرحباً بك في محرر الأكواد والخادم المحلي</h2>
+                    <p>قم بإنشاء ملف جديد أو افتح ملفاً موجوداً من شريط المستكشف الجانبي للبدء. يمكنك أيضاً رفع ملفات من جهازك باستخدام زر "رفع ملفات".</p>
+                </div>
+                <div id="editor" style="display: none;"></div>
+            </div>
+
+            <div class="preview-container" id="preview-container">
+                <iframe id="preview-iframe"></iframe>
+            </div>
+
+            <div class="status-bar">
+                <span id="cursor-position">السطر: 1، العمود: 1</span>
+                <span class="language" id="language-indicator">لغة: لم يتم تحديدها</span>
+            </div>
         </div>
     </div>
-    
-    <div class="main-content" id="main-content">
-        <div class="header">
-            <h2>متصفح الملفات</h2>
-            <button id="toggle-sidebar">☰ القائمة</button>
-        </div>
-        
-        <div class="empty-state" id="empty-state">
-            <i>📁</i>
-            <h3>اختر ملفًا أو مجلدًا للبدء</h3>
-            <p>اضغط على الزر أدناه لاختيار ملف أو مجلد من جهازك</p>
-            <button id="open-folder" class="btn-open pulse">فتح مجلد</button>
-        </div>
-        
-        <div id="file-explorer" style="display: none;">
-            <div class="file-actions">
-                <button id="back-button">العودة للخلف</button>
-                <button id="new-folder-btn" class="btn-open">مجلد جديد</button>
+
+    <!-- مودال إنشاء ملف جديد -->
+    <div class="modal" id="new-file-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إنشاء ملف جديد</h2>
+                <i class="fas fa-times close-modal"></i>
             </div>
-            
-            <div id="current-path" style="margin: 15px 0; font-weight: bold; color: #3498db;"></div>
-            
-            <div id="file-listing"></div>
-            
-            <div id="file-viewer" style="display: none;">
-                <h3 id="current-file-name"></h3>
-                <div class="file-actions">
-                    <button id="run-btn" class="btn-run">تشغيل</button>
-                    <button id="save-btn">حفظ</button>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-file-name">اسم الملف:</label>
+                    <input type="text" id="new-file-name" class="form-control" placeholder="مثال: index.html">
                 </div>
-                <textarea id="file-content" class="file-content"></textarea>
-                <div id="preview-container" class="preview-container" style="display: none;"></div>
+                <div class="form-group">
+                    <label for="new-file-type">نوع الملف:</label>
+                    <select id="new-file-type" class="form-control">
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="js">JavaScript</option>
+                        <option value="txt">نص عادي</option>
+                    </select>
+                </div>
             </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel close-modal">إلغاء</button>
+                <button class="modal-button primary" id="create-file-btn">إنشاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال إنشاء مجلد جديد -->
+    <div class="modal" id="new-folder-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إنشاء مجلد جديد</h2>
+                <i class="fas fa-times close-modal"></i>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-folder-name">اسم المجلد:</label>
+                    <input type="text" id="new-folder-name" class="form-control" placeholder="مثال: مجلد جديد">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel close-modal">إلغاء</button>
+                <button class="modal-button primary" id="create-folder-btn">إنشاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال رفع ملف -->
+    <div class="modal" id="upload-file-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>رفع ملف</h2>
+                <i class="fas fa-times close-modal"></i>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="upload-file-input" class="file-input-label">
+                        <i class="fas fa-cloud-upload-alt"></i> اختر ملفاً أو اسحبه هنا
+                    </label>
+                    <input type="file" id="upload-file-input" multiple>
+                </div>
+                <div id="upload-file-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel close-modal">إلغاء</button>
+                <button class="modal-button primary" id="upload-files-btn">رفع</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- قائمة السياق -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" data-action="new-file">
+            <i class="fas fa-file"></i>
+            ملف جديد
+        </div>
+        <div class="context-menu-item" data-action="new-folder">
+            <i class="fas fa-folder"></i>
+            مجلد جديد
+        </div>
+        <div class="context-menu-item" data-action="rename">
+            <i class="fas fa-edit"></i>
+            إعادة تسمية
+        </div>
+        <div class="context-menu-item" data-action="delete">
+            <i class="fas fa-trash-alt"></i>
+            حذف
         </div>
     </div>
 
     <script>
-        // JavaScript Code
-        document.addEventListener('DOMContentLoaded', function() {
-            // تعريف المتغيرات
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const toggleSidebarBtn = document.getElementById('toggle-sidebar');
-            const openFolderBtn = document.getElementById('open-folder');
-            const folderList = document.getElementById('folder-list');
-            const emptyState = document.getElementById('empty-state');
-            const fileExplorer = document.getElementById('file-explorer');
-            const fileViewer = document.getElementById('file-viewer');
-            const currentPath = document.getElementById('current-path');
-            const fileListing = document.getElementById('file-listing');
-            const fileContent = document.getElementById('file-content');
-            const currentFileName = document.getElementById('current-file-name');
-            const runBtn = document.getElementById('run-btn');
-            const saveBtn = document.getElementById('save-btn');
-            const backButton = document.getElementById('back-button');
-            const previewContainer = document.getElementById('preview-container');
-            const newFolderBtn = document.getElementById('new-folder-btn');
+        // النظام الملفي الافتراضي
+        const fileSystem = {
+            root: {
+                type: 'folder',
+                name: 'المجلد الرئيسي',
+                children: {
+                    'index.html': {
+                        type: 'file',
+                        fileType: 'html',
+                        content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>مرحباً بالعالم</title>\n    <link rel="stylesheet" href="styles.css">\n</head>\n<body>\n    <h1>مرحباً بالعالم!</h1>\n    <p>هذا هو مشروعي الأول.</p>\n    \n    <script src="script.js"><\/script>\n</body>\n</html>'
+                    },
+                    'styles.css': {
+                        type: 'file',
+                        fileType: 'css',
+                        content: 'body {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 20px;\n    background-color: #f5f5f5;\n}\n\nh1 {\n    color: #333;\n    text-align: center;\n}\n\np {\n    color: #666;\n    text-align: center;\n}'
+                    },
+                    'script.js': {
+                        type: 'file',
+                        fileType: 'js',
+                        content: '// هذا ملف جافا سكريبت\nconsole.log("مرحباً من جافا سكريبت!");\n\ndocument.addEventListener("DOMContentLoaded", function() {\n    console.log("تم تحميل الصفحة بالكامل!");\n});'
+                    },
+                    'مشروع-جديد': {
+                        type: 'folder',
+                        name: 'مشروع جديد',
+                        children: {
+                            'index.html': {
+                                type: 'file',
+                                fileType: 'html',
+                                content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>مشروع جديد</title>\n</head>\n<body>\n    <h1>مشروع جديد</h1>\n</body>\n</html>'
+                            }
+                        }
+                    }
+                }
+            }
+        };
 
-            // متغيرات لتخزين الحالة
-            let currentDirectory = null;
-            let directoryHandle = null;
-            let fileHandle = null;
-            let directoryStructure = {};
-            let navigationHistory = [];
+        // المسار الحالي
+        let currentPath = ['root'];
+        
+        // الملفات المفتوحة وحالتها
+        const openFiles = {};
+        let activeFile = null;
 
-            // تبديل القائمة الجانبية
-            toggleSidebarBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('sidebar-expanded');
-                if (sidebar.classList.contains('sidebar-expanded')) {
-                    mainContent.style.marginRight = '250px';
+        // تهيئة محرر الأكواد
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/html");
+        editor.setOptions({
+            fontSize: "14px",
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true
+        });
+
+        // مؤشر تغيير موضع المؤشر
+        editor.session.selection.on('changeCursor', function() {
+            const cursorPosition = editor.selection.getCursor();
+            document.getElementById('cursor-position').textContent = `السطر: ${cursorPosition.row + 1}، العمود: ${cursorPosition.column + 1}`;
+        });
+
+        // مؤشر تغيير محتوى المحرر
+        editor.session.on('change', function() {
+            if (activeFile) {
+                openFiles[activeFile].isDirty = true;
+                updateTabStatus(activeFile);
+            }
+        });
+
+        // تحديث حالة التبويب (علامة التعديل)
+        function updateTabStatus(filePath) {
+            const file = openFiles[filePath];
+            const tabElement = document.querySelector(`.tab[data-path="${filePath}"]`);
+            
+            if (tabElement) {
+                if (file.isDirty) {
+                    if (!tabElement.querySelector('.dirty-indicator')) {
+                        const indicator = document.createElement('span');
+                        indicator.className = 'dirty-indicator';
+                        indicator.textContent = ' *';
+                        tabElement.insertBefore(indicator, tabElement.querySelector('.close-btn'));
+                    }
                 } else {
-                    mainContent.style.marginRight = '0';
-                }
-            });
-
-            // فتح مجلد
-            openFolderBtn.addEventListener('click', async function() {
-                try {
-                    // التحقق من دعم متصفح الويب لواجهة الوصول إلى نظام الملفات
-                    if ('showDirectoryPicker' in window) {
-                        directoryHandle = await window.showDirectoryPicker();
-                        currentDirectory = directoryHandle;
-                        navigationHistory = [directoryHandle];
-                        await listDirectoryContents(directoryHandle);
-                        emptyState.style.display = 'none';
-                        fileExplorer.style.display = 'block';
-                        currentPath.textContent = `المسار الحالي: ${directoryHandle.name}`;
-                        updateSidebar();
-                    } else {
-                        alert('متصفح الويب الخاص بك لا يدعم واجهة الوصول إلى نظام الملفات. يرجى استخدام متصفح أحدث مثل Chrome أو Edge.');
-                    }
-                } catch (error) {
-                    console.error('حدث خطأ أثناء فتح المجلد:', error);
-                }
-            });
-
-            // العودة للخلف في التصفح
-            backButton.addEventListener('click', function() {
-                if (navigationHistory.length > 1) {
-                    // إزالة العنصر الحالي من التاريخ والعودة إلى العنصر السابق
-                    navigationHistory.pop();
-                    currentDirectory = navigationHistory[navigationHistory.length - 1];
-                    listDirectoryContents(currentDirectory);
-                    currentPath.textContent = `المسار الحالي: ${getFullPath(navigationHistory)}`;
-                    fileViewer.style.display = 'none';
-                }
-            });
-
-            // إنشاء مجلد جديد
-            newFolderBtn.addEventListener('click', async function() {
-                if (currentDirectory) {
-                    const folderName = prompt('أدخل اسم المجلد الجديد:');
-                    if (folderName) {
-                        try {
-                            await currentDirectory.getDirectoryHandle(folderName, { create: true });
-                            // تحديث قائمة الملفات
-                            listDirectoryContents(currentDirectory);
-                        } catch (error) {
-                            console.error('خطأ في إنشاء المجلد:', error);
-                            alert('فشل إنشاء المجلد: ' + error.message);
-                        }
+                    const indicator = tabElement.querySelector('.dirty-indicator');
+                    if (indicator) {
+                        indicator.remove();
                     }
                 }
-            });
+            }
+        }
 
-            // حفظ الملف
-            saveBtn.addEventListener('click', async function() {
-                if (fileHandle) {
-                    try {
-                        const writable = await fileHandle.createWritable();
-                        await writable.write(fileContent.value);
-                        await writable.close();
-                        alert('تم حفظ الملف بنجاح!');
-                    } catch (error) {
-                        console.error('خطأ في حفظ الملف:', error);
-                        alert('فشل حفظ الملف: ' + error.message);
-                    }
-                }
-            });
-
-            // تشغيل الملف
-            runBtn.addEventListener('click', function() {
-                if (fileHandle) {
-                    const fileName = fileHandle.name.toLowerCase();
-                    if (fileName.endsWith('.html')) {
-                        previewContainer.style.display = 'block';
-                        previewContainer.innerHTML = fileContent.value;
-                    } else if (fileName.endsWith('.js')) {
-                        try {
-                            const scriptResult = eval(fileContent.value);
-                            previewContainer.style.display = 'block';
-                            previewContainer.innerHTML = `<h4>نتيجة التنفيذ:</h4><pre>${scriptResult}</pre>`;
-                        } catch (error) {
-                            previewContainer.style.display = 'block';
-                            previewContainer.innerHTML = `<h4>خطأ في التنفيذ:</h4><pre style="color: red;">${error}</pre>`;
-                        }
-                    } else if (fileName.endsWith('.css')) {
-                        previewContainer.style.display = 'block';
-                        previewContainer.innerHTML = `
-                            <h4>معاينة CSS:</h4>
-                            <style>${fileContent.value}</style>
-                            <div id="css-preview" style="border: 1px dashed #ddd; padding: 15px; margin-top: 10px;">
-                                <h3>معاينة نمط CSS</h3>
-                                <p>هذا النص للمعاينة.</p>
-                                <button>زر للمعاينة</button>
-                            </div>
-                        `;
-                    }
-                }
-            });
-
-            // عرض محتويات المجلد
-            async function listDirectoryContents(directoryHandle) {
-                fileListing.innerHTML = '';
+        // وظيفة لإعادة رسم مستكشف الملفات
+        function renderFileBrowser() {
+            const fileBrowser = document.getElementById('file-browser');
+            fileBrowser.innerHTML = '';
+            
+            // وظيفة متداخلة لعرض المجلدات والملفات بشكل متكرر
+            function renderFolder(folderObj, pathArray, containerElement) {
+                // إنشاء عنصر المجلد
+                const folderElement = document.createElement('div');
+                folderElement.className = 'folder';
+                folderElement.setAttribute('data-path', pathArray.join('/'));
                 
-                // تحديث قائمة الملفات والمجلدات
-                for await (const entry of directoryHandle.values()) {
-                    const item = document.createElement('div');
-                    item.className = entry.kind === 'directory' ? 'folder-item' : 'file-item';
+                // عنوان المجلد
+                const folderTitleElement = document.createElement('div');
+                folderTitleElement.className = 'folder-title';
+                folderTitleElement.innerHTML = `<i class="fas fa-folder"></i>${folderObj.name || pathArray[pathArray.length - 1]}`;
+                folderElement.appendChild(folderTitleElement);
+                
+                // توسيع/طي المجلد عند النقر
+                folderTitleElement.addEventListener('click', function(e) {
+                    folderElement.classList.toggle('open');
+                    e.stopPropagation();
+                });
+                
+                // معالجة النقر بالزر الأيمن على المجلد
+                folderTitleElement.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    showContextMenu(e, pathArray.join('/'), 'folder');
+                });
+                
+                // محتوى المجلد
+                const folderContentElement = document.createElement('div');
+                folderContentElement.className = 'folder-content';
+                folderElement.appendChild(folderContentElement);
+                
+                // إضافة المجلد إلى الحاوية
+                containerElement.appendChild(folderElement);
+                
+                // استدعاء متكرر لعرض محتويات المجلد
+                if (folderObj.children) {
+                    const sortedItems = [];
                     
-                    // إضافة أيقونة مناسبة حسب نوع الملف
-                    const icon = document.createElement('span');
-                    icon.className = 'icon';
-                    if (entry.kind === 'directory') {
-                        icon.textContent = '📁';
-                    } else {
-                        const fileName = entry.name.toLowerCase();
-                        if (fileName.endsWith('.html')) {
-                            icon.textContent = '🌐';
-                        } else if (fileName.endsWith('.js')) {
-                            icon.textContent = '📜';
-                        } else if (fileName.endsWith('.css')) {
-                            icon.textContent = '🎨';
-                        } else {
-                            icon.textContent = '📄';
-                        }
+                    // فرز العناصر (المجلدات أولاً ثم الملفات)
+                    for (const itemName in folderObj.children) {
+                        const item = folderObj.children[itemName];
+                        sortedItems.push({
+                            name: itemName,
+                            type: item.type,
+                            object: item
+                        });
                     }
                     
-                    item.appendChild(icon);
-                    
-                    const name = document.createElement('span');
-                    name.textContent = entry.name;
-                    item.appendChild(name);
-                    
-                    // إضافة حدث النقر
-                    item.addEventListener('click', async function() {
-                        if (entry.kind === 'directory') {
-                            currentDirectory = entry;
-                            navigationHistory.push(entry);
-                            await listDirectoryContents(entry);
-                            currentPath.textContent = `المسار الحالي: ${getFullPath(navigationHistory)}`;
-                            fileViewer.style.display = 'none';
-                        } else {
-                            // عرض محتوى الملف
-                            try {
-                                fileHandle = entry;
-                                const file = await entry.getFile();
-                                const contents = await file.text();
-                                fileContent.value = contents;
-                                currentFileName.textContent = entry.name;
-                                fileViewer.style.display = 'block';
-                                previewContainer.style.display = 'none';
-                                
-                                // تفعيل زر التشغيل للملفات المدعومة فقط
-                                const fileName = entry.name.toLowerCase();
-                                if (fileName.endsWith('.html') || fileName.endsWith('.js') || fileName.endsWith('.css')) {
-                                    runBtn.style.display = 'inline-block';
-                                } else {
-                                    runBtn.style.display = 'none';
-                                }
-                            } catch (error) {
-                                console.error('خطأ في قراءة الملف:', error);
-                            }
+                    sortedItems.sort((a, b) => {
+                        if (a.type === b.type) {
+                            return a.name.localeCompare(b.name);
                         }
+                        return a.type === 'folder' ? -1 : 1;
                     });
                     
-                    fileListing.appendChild(item);
+                    // عرض العناصر المفروزة
+                    sortedItems.forEach(item => {
+                        const newPath = [...pathArray, item.name];
+                        
+                        if (item.type === 'folder') {
+                            renderFolder(item.object, newPath, folderContentElement);
+                        } else {
+                            // إنشاء عنصر الملف
+                            const fileElement = document.createElement('div');
+                            fileElement.className = `file ${item.object.fileType}-file`;
+                            fileElement.setAttribute('data-path', newPath.join('/'));
+                            
+                            let icon;
+                            switch (item.object.fileType) {
+                                case 'html':
+                                    icon = 'html5';
+                                    break;
+                                case 'css':
+                                    icon = 'css3-alt';
+                                    break;
+                                case 'js':
+                                    icon = 'js';
+                                    break;
+                                default:
+                                    icon = 'file-alt';
+                            }
+                            
+                            fileElement.innerHTML = `<i class="fab fa-${icon}"></i>${item.name}`;
+                            
+                            // فتح الملف عند النقر
+                            fileElement.addEventListener('click', function() {
+                                openFile(newPath.join('/'));
+                            });
+                            
+                            // معالجة النقر بالزر الأيمن على الملف
+                            fileElement.addEventListener('contextmenu', function(e) {
+                                e.preventDefault();
+                                showContextMenu(e, newPath.join('/'), 'file');
+                            });
+                            
+                            folderContentElement.appendChild(fileElement);
+                        }
+                    });
                 }
             }
+            
+            // بدء العرض من المجلد الجذر
+            renderFolder(fileSystem.root, ['root'], fileBrowser);
+            
+            // فتح المجلد الرئيسي افتراضياً
+            const rootFolder = document.querySelector('.folder[data-path="root"]');
+            if (rootFolder) {
+                rootFolder.classList.add('open');
+            }
+        }
 
-            // تحديث الشريط الجانبي
-            async function updateSidebar() {
-                folderList.innerHTML = '';
+        // وظيفة للحصول على كائن من النظام الملفي باستخدام المسار
+        function getFileSystemObjectByPath(path) {
+            const pathArray = path.split('/');
+            let current = fileSystem;
+            
+            for (let i = 0; i < pathArray.length; i++) {
+                const segment = pathArray[i];
                 
-                if (directoryHandle) {
-                    // إضافة المجلد الرئيسي
-                    const rootItem = document.createElement('div');
-                    rootItem.className = 'folder-item';
-                    rootItem.innerHTML = `<span class="icon">📁</span> ${directoryHandle.name} (الرئيسي)`;
-                    rootItem.addEventListener('click', function() {
-                        currentDirectory = directoryHandle;
-                        navigationHistory = [directoryHandle];
-                        listDirectoryContents(directoryHandle);
-                        currentPath.textContent = `المسار الحالي: ${directoryHandle.name}`;
-                        fileViewer.style.display = 'none';
-                    });
-                    folderList.appendChild(rootItem);
-                    
-                    // إضافة المجلدات المتاحة
-                    try {
-                        for await (const entry of directoryHandle.values()) {
-                            if (entry.kind === 'directory') {
-                                const item = document.createElement('div');
-                                item.className = 'folder-item';
-                                item.innerHTML = `<span class="icon">📁</span> ${entry.name}`;
-                                item.addEventListener('click', function() {
-                                    currentDirectory = entry;
-                                    navigationHistory = [directoryHandle, entry];
-                                    listDirectoryContents(entry);
-                                    currentPath.textContent = `المسار الحالي: ${directoryHandle.name}/${entry.name}`;
-                                    fileViewer.style.display = 'none';
-                                });
-                                folderList.appendChild(item);
-                            }
-                        }
-                    } catch (error) {
-                        console.error('خطأ في تحديث الشريط الجانبي:', error);
+                if (i === 0 && segment === 'root') {
+                    current = current.root;
+                } else {
+                    if (current.children && current.children[segment]) {
+                        current = current.children[segment];
+                    } else {
+                        return null;
                     }
                 }
             }
+            
+            return current;
+        }
 
-            // الحصول على المسار الكامل
-            function getFullPath(history) {
-                return history.map(handle => handle.name).join('/');
+        // وظيفة للحصول على اسم الملف من المسار
+        function getFilenameFromPath(path) {
+            const pathArray = path.split('/');
+            return pathArray[pathArray.length - 1];
+        }
+
+        // وظيفة لإضافة تبويب جديد
+        function addTab(filePath) {
+            const tabsContainer = document.getElementById('tabs');
+            const filename = getFilenameFromPath(filePath);
+            const fileObj = getFileSystemObjectByPath(filePath);
+            
+            // إنشاء عنصر التبويب
+            const tabElement = document.createElement('div');
+            tabElement.className = 'tab';
+            tabElement.setAttribute('data-path', filePath);
+            
+            // أيقونة نوع الملف
+            let icon;
+            switch (fileObj.fileType) {
+                case 'html':
+                    icon = 'html5';
+                    break;
+                case 'css':
+                    icon = 'css3-alt';
+                    break;
+                case 'js':
+                    icon = 'js';
+                    break;
+                default:
+                    icon = 'file-alt';
             }
+            
+            tabElement.innerHTML = `
+                <i class="fab fa-${icon} file-type"></i>
+                <span>${filename}</span>
+                <i class="fas fa-times close-btn"></i>
+            `;
+            
+            // معالجة النقر على التبويب
+            tabElement.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('close-btn')) {
+                    activateTab(filePath);
+                }
+            });
+            
+            // معالجة زر الإغلاق
+            tabElement.querySelector('.close-btn').addEventListener('click', function(e) {
+                closeFile(filePath);
+                e.stopPropagation();
+            });
+            
+            tabsContainer.appendChild(tabElement);
+        }
+
+        // وظيفة لتنشيط تبويب
+        function activateTab(filePath) {
+            // إزالة الصنف النشط من جميع التبويبات
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // إضافة الصنف النشط للتبويب المحدد
+            const tabElement = document.querySelector(`.tab[data-path="${filePath}"]`);
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+            
+            // تحديث الملف النشط
+            activeFile = filePath;
+            
+            // تحديث المحرر
+            const file = openFiles[filePath];
+            if (file) {
+                // تحديث وضع المحرر حسب نوع الملف
+                const fileObj = getFileSystemObjectByPath(filePath);
+                if (fileObj) {
+                    switch (fileObj.fileType) {
+                        case 'html':
+                            editor.session.setMode("ace/mode/html");
+                            document.getElementById('language-indicator').textContent = 'لغة: HTML';
+                            break;
+                        case 'css':
+                            editor.session.setMode("ace/mode/css");
+                            document.getElementById('language-indicator').textContent = 'لغة: CSS';
+                            break;
+                        case 'js':
+                            editor.session.setMode("ace/mode/javascript");
+                            document.getElementById('language-indicator').textContent = 'لغة: JavaScript';
+                            break;
+                        default:
+                            editor.session.setMode("ace/mode/text");
+                            document.getElementById('language-indicator').textContent = 'لغة: نص عادي';
+                    }
+                }
+                
+                // تحديث محتوى المحرر
+                editor.setValue(file.content);
+                editor.clearSelection();
+                
+                // إظهار المحرر وإخفاء الشاشة الترحيبية
+                document.querySelector('.no-file-opened').style.display = 'none';
+                document.getElementById('editor').style.display = 'block';
+            }
+        }
+
+        // وظيفة لفتح ملف
+        function openFile(filePath) {
+            const fileObj = getFileSystemObjectByPath(filePath);
+            
+            if (!fileObj || fileObj.type !== 'file') {
+                console.error('الملف غير موجود أو ليس ملفًا صالحًا');
+                return;
+            }
+            
+            // تحقق مما إذا كان الملف مفتوحًا بالفعل
+            if (!openFiles[filePath]) {
+                // إضافة الملف إلى قائمة الملفات المفتوحة
+                openFiles[filePath] = {
+                    content: fileObj.content,
+                    isDirty: false
+                };
+                
+                // إضافة تبويب جديد
+                addTab(filePath);
+            }
+            
+            // تنشيط التبويب
+            activateTab(filePath);
+        }
+
+        // وظيفة لإغلاق ملف
+        function closeFile(filePath) {
+            const file = openFiles[filePath];
+            
+            if (file && file.isDirty) {
+                // إذا تم تعديل الملف، يمكن إضافة تنبيه هنا
+                if (!confirm('هل تريد إغلاق الملف بدون حفظ التغييرات؟')) {
+                    return;
+                }
+            }
+            
+            // إزالة التبويب
+            const tabElement = document.querySelector(`.tab[data-path="${filePath}"]`);
+            if (tabElement) {
+                tabElement.remove();
+            }
+            
+            // إزالة الملف من قائمة الملفات المفتوحة
+            delete openFiles[filePath];
+            
+            // إذا كان هذا هو الملف النشط، قم بتنشيط ملف آخر أو إظهار الشاشة الترحيبية
+            if (activeFile === filePath) {
+                const remainingTabs = document.querySelectorAll('.tab');
+                if (remainingTabs.length > 0) {
+                    const newPath = remainingTabs[remainingTabs.length - 1].getAttribute('data-path');
+                    activateTab(newPath);
+                } else {
+                    activeFile = null;
+                    document.querySelector('.no-file-opened').style.display = 'flex';
+                    document.getElementById('editor').style.display = 'none';
+                }
+            }
+        }
+
+        // وظيفة لحفظ الملف النشط
+        function saveActiveFile() {
+            if (!activeFile) {
+                return;
+            }
+            
+            const fileObj = getFileSystemObjectByPath(activeFile);
+            if (!fileObj) {
+                return;
+            }
+            
+            // الحصول على المحتوى من المحرر
+            const content = editor.getValue();
+            
+            // تحديث النظام الملفي
+            fileObj.content = content;
+            
+            // تحديث حالة الملف المفتوح
+            openFiles[activeFile].content = content;
+            openFiles[activeFile].isDirty = false;
+            
+            // تحديث التبويب
+            updateTabStatus(activeFile);
+        }
+
+        // وظيفة لتشغيل الصفحة الرئيسية
+        function runApplication() {
+            // البحث عن index.html في المجلد الجذر أو الملف النشط
+            let htmlFilePath;
+            
+            if (activeFile && activeFile.endsWith('.html')) {
+                htmlFilePath = activeFile;
+            } else {
+                htmlFilePath = 'root/index.html';
+            }
+            
+            const htmlFile = getFileSystemObjectByPath(htmlFilePath);
+            
+            if (!htmlFile) {
+                alert('لم يتم العثور على ملف HTML لتشغيله.');
+                return;
+            }
+            
+            // إذا كان الملف مفتوحًا ومعدلًا، استخدم المحتوى من المحرر
+            let htmlContent;
+            if (openFiles[htmlFilePath] && openFiles[htmlFilePath].isDirty) {
+                if (activeFile === htmlFilePath) {
+                    htmlContent = editor.getValue();
+                } else {
+                    htmlContent = openFiles[htmlFilePath].content;
+                }
+            } else {
+                htmlContent = htmlFile.content;
+            }
+            
+            // استبدال الروابط الخارجية بالمحتوى الفعلي
+            htmlContent = processHtmlForPreview(htmlContent, htmlFilePath);
+            
+            // عرض معاينة الصفحة
+            showPreview(htmlContent);
+        }
+
+        // معالجة الروابط في ملف HTML للمعاينة
+        function processHtmlForPreview(htmlContent, htmlFilePath) {
+            const pathParts = htmlFilePath.split('/');
+            pathParts.pop(); // إزالة اسم الملف
+            const basePath = pathParts.join('/');
+            
+            // استبدال روابط CSS
+            htmlContent = htmlContent.replace(/<link[^>]*href=["']([^"']+)["'][^>]*>/gi, function(match, href) {
+                if (href.startsWith('http') || href.startsWith('//')) {
+                    return match; // ترك الروابط الخارجية كما هي
+                }
+                
+                const cssPath = resolvePath(basePath, href);
+                const cssFile = getFileSystemObjectByPath(cssPath);
+                
+                if (cssFile) {
+                    // استخدام المحتوى من الملفات المفتوحة إذا كان معدلًا
+                    let cssContent;
+                    if (openFiles[cssPath] && openFiles[cssPath].isDirty) {
+                        cssContent = openFiles[cssPath].content;
+                    } else {
+                        cssContent = cssFile.content;
+                    }
+                    
+                    return `<style>${cssContent}</style>`;
+                }
+                
+                return match;
+            });
+            
+            // استبدال روابط JavaScript
+            htmlContent = htmlContent.replace(/<script[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi, function(match, src) {
+                if (src.startsWith('http') || src.startsWith('//')) {
+                    return match; // ترك الروابط الخارجية كما هي
+                }
+                
+                const jsPath = resolvePath(basePath, src);
+                const jsFile = getFileSystemObjectByPath(jsPath);
+                
+                if (jsFile) {
+                    // استخدام المحتوى من الملفات المفتوحة إذا كان معدلًا
+                    let jsContent;
+                    if (openFiles[jsPath] && openFiles[jsPath].isDirty) {
+                        jsContent = openFiles[jsPath].content;
+                    } else {
+                        jsContent = jsFile.content;
+                    }
+                    
+                    return `<script>${jsContent}<\/script>`;
+                }
+                
+                return match;
+            });
+            
+            return htmlContent;
+        }
+
+        // حل المسار النسبي
+        function resolvePath(basePath, relativePath) {
+            // إزالة ./ من بداية المسار النسبي
+            if (relativePath.startsWith('./')) {
+                relativePath = relativePath.substring(2);
+            }
+            
+            // معالجة ../
+            const baseSegments = basePath.split('/');
+            const relativeSegments = relativePath.split('/');
+            
+            while (relativeSegments.length > 0 && relativeSegments[0] === '..') {
+                relativeSegments.shift();
+                baseSegments.pop();
+            }
+            
+            return [...baseSegments, ...relativeSegments].join('/');
+        }
+
+        // عرض معاينة الصفحة
+        function showPreview(htmlContent) {
+            const previewContainer = document.getElementById('preview-container');
+            const editorContainer = document.getElementById('editor-container');
+            const iframe = document.getElementById('preview-iframe');
+            
+            // إظهار الحاوية
+            previewContainer.style.display = 'block';
+            editorContainer.style.display = 'none';
+            
+            // تحديث محتوى الـ iframe
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(htmlContent);
+            iframeDoc.close();
+            
+            // إضافة زر العودة إلى المحرر
+            if (!document.getElementById('back-to-editor-btn')) {
+                const backButton = document.createElement('button');
+                backButton.id = 'back-to-editor-btn';
+                backButton.className = 'run-button';
+                backButton.innerHTML = '<i class="fas fa-arrow-left"></i> العودة إلى المحرر';
+                backButton.style.position = 'absolute';
+                backButton.style.top = '10px';
+                backButton.style.right = '10px';
+                backButton.style.zIndex = '100';
+                
+                backButton.addEventListener('click', function() {
+                    previewContainer.style.display = 'none';
+                    editorContainer.style.display = 'block';
+                    this.remove();
+                });
+                
+                previewContainer.appendChild(backButton);
+            }
+        }
+
+        // وظيفة لعرض قائمة السياق
+        function showContextMenu(event, path, type) {
+            const contextMenu = document.getElementById('context-menu');
+            
+            // تحديد العناصر التي ستظهر في القائمة حسب النوع
+            document.querySelectorAll('.context-menu-item').forEach(item => {
+                const action = item.getAttribute('data-action');
+                
+                if (type === 'file' && (action === 'new-file' || action === 'new-folder')) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'flex';
+                }
+            });
+            
+            // وضع القائمة
+            contextMenu.style.left = `${event.pageX}px`;
+            contextMenu.style.top = `${event.pageY}px`;
+            contextMenu.style.display = 'block';
+            
+            // تخزين معلومات العنصر المحدد
+            contextMenu.setAttribute('data-target-path', path);
+            contextMenu.setAttribute('data-target-type', type);
+            
+            // إضافة مستمع لإخفاء القائمة عند النقر في أي مكان آخر
+            window.addEventListener('click', hideContextMenu);
+            window.addEventListener('contextmenu', hideContextMenu);
+        }
+
+        // وظيفة لإخفاء قائمة السياق
+        function hideContextMenu() {
+            const contextMenu = document.getElementById('context-menu');
+            contextMenu.style.display = 'none';
+            
+            // إزالة المستمعين
+            window.removeEventListener('click', hideContextMenu);
+            window.removeEventListener('contextmenu', hideContextMenu);
+        }
+
+        // وظيفة لإنشاء ملف جديد
+        function createNewFile(parentPath, fileName, fileType) {
+            const parentFolder = getFileSystemObjectByPath(parentPath);
+            
+            if (!parentFolder || parentFolder.type !== 'folder') {
+                alert('المجلد الأب غير صالح');
+                return;
+            }
+            
+            // التحقق من وجود الملف
+            if (parentFolder.children[fileName]) {
+                alert('الملف موجود بالفعل');
+                return;
+            }
+            
+            // إنشاء محتوى افتراضي حسب نوع الملف
+            let defaultContent = '';
+            
+            switch (fileType) {
+                case 'html':
+                    defaultContent = '<!DOCTYPE html>\n<html>\n<head>\n    <title>صفحة جديدة</title>\n</head>\n<body>\n    <h1>مرحباً بالعالم!</h1>\n</body>\n</html>';
+                    break;
+                case 'css':
+                    defaultContent = '/* أنماط CSS */\nbody {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 20px;\n}';
+                    break;
+                case 'js':
+                    defaultContent = '// كود جافا سكريبت\nconsole.log("مرحباً من جافا سكريبت!");';
+                    break;
+            }
+            
+            // إضافة الملف إلى النظام الملفي
+            parentFolder.children[fileName] = {
+                type: 'file',
+                fileType: fileType,
+                content: defaultContent
+            };
+            
+            // إعادة رسم مستكشف الملفات
+            renderFileBrowser();
+            
+            // فتح الملف الجديد
+            openFile(`${parentPath}/${fileName}`);
+        }
+
+        // وظيفة لإنشاء مجلد جديد
+        function createNewFolder(parentPath, folderName) {
+            const parentFolder = getFileSystemObjectByPath(parentPath);
+            
+            if (!parentFolder || parentFolder.type !== 'folder') {
+                alert('المجلد الأب غير صالح');
+                return;
+            }
+            
+            // التحقق من وجود المجلد
+            if (parentFolder.children[folderName]) {
+                alert('المجلد موجود بالفعل');
+                return;
+            }
+            
+            // إضافة المجلد إلى النظام الملفي
+            parentFolder.children[folderName] = {
+                type: 'folder',
+                name: folderName,
+                children: {}
+            };
+            
+            // إعادة رسم مستكشف الملفات
+            renderFileBrowser();
+            
+            // فتح المجلد الجديد
+            const folderElement = document.querySelector(`.folder[data-path="${parentPath}/${folderName}"]`);
+            if (folderElement) {
+                folderElement.classList.add('open');
+            }
+        }
+
+        // وظيفة لمعالجة رفع الملفات
+        function handleFileUpload(files, parentPath) {
+            const parentFolder = getFileSystemObjectByPath(parentPath);
+            
+            if (!parentFolder || parentFolder.type !== 'folder') {
+                alert('المجلد الأب غير صالح');
+                return;
+            }
+            
+            // معالجة كل ملف
+            Array.from(files).forEach(file => {
+                const fileName = file.name;
+                const fileExtension = fileName.split('.').pop().toLowerCase();
+                
+                // تحديد نوع الملف
+                let fileType = 'txt';
+                if (fileExtension === 'html' || fileExtension === 'htm') {
+                    fileType = 'html';
+                } else if (fileExtension === 'css') {
+                    fileType = 'css';
+                } else if (fileExtension === 'js') {
+                    fileType = 'js';
+                }
+                
+                // قراءة محتوى الملف
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // إضافة الملف إلى النظام الملفي
+                    parentFolder.children[fileName] = {
+                        type: 'file',
+                        fileType: fileType,
+                        content: e.target.result
+                    };
+                    
+                    // إعادة رسم مستكشف الملفات
+                    renderFileBrowser();
+                };
+                
+                reader.readAsText(file);
+            });
+        }
+
+        // وظيفة لحذف ملف أو مجلد
+        function deleteFileOrFolder(path) {
+            const pathArray = path.split('/');
+            const itemName = pathArray.pop();
+            const parentPath = pathArray.join('/');
+            
+            const parentFolder = getFileSystemObjectByPath(parentPath);
+            
+            if (!parentFolder || parentFolder.type !== 'folder' || !parentFolder.children[itemName]) {
+                alert('العنصر غير موجود');
+                return;
+            }
+            
+            // التحقق مما إذا كان الملف مفتوحًا
+            if (openFiles[path]) {
+                closeFile(path);
+            }
+            
+            // حذف العنصر
+            delete parentFolder.children[itemName];
+            
+            // إعادة رسم مستكشف الملفات
+            renderFileBrowser();
+        }
+
+        // معالجة النقر على عناصر قائمة السياق
+        document.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const action = this.getAttribute('data-action');
+                const contextMenu = document.getElementById('context-menu');
+                const targetPath = contextMenu.getAttribute('data-target-path');
+                const targetType = contextMenu.getAttribute('data-target-type');
+                
+                switch (action) {
+                    case 'new-file':
+                        // عرض مودال إنشاء ملف جديد
+                        document.getElementById('new-file-modal').style.display = 'flex';
+                        document.getElementById('new-file-name').value = '';
+                        document.getElementById('new-file-modal').setAttribute('data-parent-path', targetPath);
+                        break;
+                        
+                    case 'new-folder':
+                        // عرض مودال إنشاء مجلد جديد
+                        document.getElementById('new-folder-modal').style.display = 'flex';
+                        document.getElementById('new-folder-name').value = '';
+                        document.getElementById('new-folder-modal').setAttribute('data-parent-path', targetPath);
+                        break;
+                        
+                    case 'rename':
+                        // ليس مطبقًا في هذا المثال
+                        break;
+                        
+                    case 'delete':
+                        if (confirm('هل أنت متأكد من أنك تريد حذف هذا العنصر؟')) {
+                            deleteFileOrFolder(targetPath);
+                        }
+                        break;
+                }
+                
+                hideContextMenu();
+            });
+        });
+
+        // معالجة النقر على زر إنشاء ملف جديد
+        document.querySelector('.new-file-btn').addEventListener('click', function() {
+            document.getElementById('new-file-modal').style.display = 'flex';
+            document.getElementById('new-file-name').value = '';
+            document.getElementById('new-file-modal').setAttribute('data-parent-path', 'root');
+        });
+
+        // معالجة النقر على زر تشغيل
+        document.querySelector('.run-button').addEventListener('click', function() {
+            runApplication();
+        });
+
+        // معالجة النقر على زر رفع ملفات
+        document.querySelector('.upload-button').addEventListener('click', function() {
+            document.getElementById('upload-file-modal').style.display = 'flex';
+            document.getElementById('upload-file-input').value = '';
+            document.getElementById('upload-file-list').innerHTML = '';
+            document.getElementById('upload-file-modal').setAttribute('data-parent-path', 'root');
+        });
+
+        // معالجة النقر على زر إغلاق المودال
+        document.querySelectorAll('.close-modal').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // معالجة النقر على زر إنشاء ملف
+        document.getElementById('create-file-btn').addEventListener('click', function() {
+            const modal = document.getElementById('new-file-modal');
+            const parentPath = modal.getAttribute('data-parent-path');
+            const fileName = document.getElementById('new-file-name').value.trim();
+            const fileType = document.getElementById('new-file-type').value;
+            
+            if (!fileName) {
+                alert('يرجى إدخال اسم للملف');
+                return;
+            }
+            
+            // إضافة امتداد الملف إذا لم يكن موجودًا
+            let finalFileName = fileName;
+            if (!finalFileName.includes('.')) {
+                finalFileName += `.${fileType}`;
+            }
+            
+            createNewFile(parentPath, finalFileName, fileType);
+            modal.style.display = 'none';
+        });
+
+        // معالجة النقر على زر إنشاء مجلد
+        document.getElementById('create-folder-btn').addEventListener('click', function() {
+            const modal = document.getElementById('new-folder-modal');
+            const parentPath = modal.getAttribute('data-parent-path');
+            const folderName = document.getElementById('new-folder-name').value.trim();
+            
+            if (!folderName) {
+                alert('يرجى إدخال اسم للمجلد');
+                return;
+            }
+            
+            createNewFolder(parentPath, folderName);
+            modal.style.display = 'none';
+        });
+
+        // معالجة تحديد الملفات للرفع
+        document.getElementById('upload-file-input').addEventListener('change', function() {
+            const fileList = document.getElementById('upload-file-list');
+            fileList.innerHTML = '';
+            
+            Array.from(this.files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.textContent = file.name;
+                fileList.appendChild(fileItem);
+            });
+        });
+
+        // معالجة النقر على زر رفع الملفات
+        document.getElementById('upload-files-btn').addEventListener('click', function() {
+            const modal = document.getElementById('upload-file-modal');
+            const parentPath = modal.getAttribute('data-parent-path');
+            const files = document.getElementById('upload-file-input').files;
+            
+            if (files.length === 0) {
+                alert('يرجى اختيار ملف واحد على الأقل');
+                return;
+            }
+            
+            handleFileUpload(files, parentPath);
+            modal.style.display = 'none';
+        });
+
+        // معالجة النقر على زر تبديل الشريط الجانبي
+        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('sidebar-collapsed');
+        });
+
+        // اختصارات لوحة المفاتيح
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S لحفظ الملف
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveActiveFile();
+            }
+            
+            // Ctrl+R لتشغيل التطبيق
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                runApplication();
+            }
+        });
+
+        // تهيئة التطبيق
+        window.addEventListener('load', function() {
+            renderFileBrowser();
         });
     </script>
 </body>
