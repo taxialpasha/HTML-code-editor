@@ -1,508 +1,2646 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محرر الأكواد والخادم المحلي - نسخة محسنة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.2/ace.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.2/ext-language_tools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.2/ext-beautify.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-    <!-- إضافة أيقونة للموقع -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    <title>نظام إدارة الاستثمار المتطور</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+
+    <link href="style.css" rel="stylesheet" />
+
+
+    <!-- إضافة مكتبات Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+
+    <!-- إعدادات Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGpAHia_wEmrhnmYjrPf1n1TrAzwEMiAI",
+            authDomain: "messageemeapp.firebaseapp.com",
+            databaseURL: "https://messageemeapp-default-rtdb.firebaseio.com",
+            projectId: "messageemeapp",
+            storageBucket: "messageemeapp.appspot.com",
+            messagingSenderId: "255034474844",
+            appId: "1:255034474844:web:5e3b7a6bc4b2fb94cc4199"
+        };
+    </script>
+
+
+    <style>
+
+    </style>
 </head>
+
 <body>
-    <!-- شريط الأدوات العلوي -->
-    <div class="header">
-        <div class="toggle-sidebar">
-            <i class="fas fa-bars"></i>
+    <!-- شريط العنوان المخصص -->
+    <div class="title-bar">
+        <div class="title-bar-left">
+            <div class="app-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="app-title">نظام إدارة الاستثمار المتطور</div>
         </div>
-        <h1>محرر الأكواد والخادم المحلي</h1>
-
-        <div class="server-status" id="server-status">
-            <i class="fas fa-circle"></i>
-            الخادم: غير نشط
+        <div class="title-bar-center">
+            <div class="exchange-rate" id="exchangeRate">
+                <i class="fas fa-dollar-sign"></i>
+                <span id="exchangeRateValue">جاري التحميل...</span>
+            </div>
+            <div class="clock" id="clock">00:00:00</div>
         </div>
-
-        <div class="header-buttons">
-            <button class="run-button" id="run-button">
-                <i class="fas fa-play"></i>
-                تشغيل
+        <div class="title-bar-right">
+            <button class="title-bar-button refresh-button" id="refreshButton" title="تحديث">
+                <i class="fas fa-sync-alt"></i>
             </button>
-            <button class="save-button" id="save-button">
-                <i class="fas fa-save"></i>
-                حفظ
+            <button class="title-bar-button minimize-button" id="minimizeButton">
+                <i class="fas fa-window-minimize"></i>
             </button>
-            <button class="format-button" id="format-button">
-                <i class="fas fa-align-left"></i>
-                تنسيق
+            <button class="title-bar-button maximize-button" id="maximizeButton">
+                <i class="fas fa-window-maximize"></i>
             </button>
-            <button class="upload-button">
-                <i class="fas fa-upload"></i>
-                رفع ملفات
-            </button>
-            <button class="export-button" id="export-button">
-                <i class="fas fa-file-export"></i>
-                تصدير المشروع
-            </button>
-            <button class="theme-toggle" id="theme-toggle">
-                <i class="fas fa-moon"></i>
+            <button class="title-bar-button close-button" id="closeButton">
+                <i class="fas fa-times"></i>
             </button>
         </div>
     </div>
-
-    <!-- الحاوية الرئيسية -->
-    <div class="main-container">
-        <!-- القائمة الجانبية -->
+    <!-- نهاية شريط العنوان -->
+    <div class="app-container">
+        <!-- Sidebar -->
         <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">مستكشف الملفات</div>
-                <div class="sidebar-controls">
-                    <div class="new-file-btn" title="ملف جديد">
-                        <i class="fas fa-file-plus"></i>
+
+            <div class="sidebar-menu">
+                <div class="menu-category">لوحة التحكم</div>
+                <a href="#dashboard" class="menu-item active" onclick="showPage('dashboard')">
+                    <span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+                    <span>الرئيسية</span>
+                </a>
+                <a href="#analytics" class="menu-item" onclick="showPage('analytics')">
+                    <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span>التحليلات</span>
+                </a>
+
+                <div class="menu-category">إدارة الاستثمار</div>
+                <a href="#investors" class="menu-item" onclick="showPage('investors')">
+                    <span class="menu-icon"><i class="fas fa-users"></i></span>
+                    <span>المستثمرين</span>
+                </a>
+                <a href="#investments" class="menu-item" onclick="showPage('investments')">
+                    <span class="menu-icon"><i class="fas fa-money-bill-wave"></i></span>
+                    <span>الاستثمارات</span>
+                </a>
+                <a href="#profits" class="menu-item" onclick="showPage('profits')">
+                    <span class="menu-icon"><i class="fas fa-hand-holding-usd"></i></span>
+                    <span>الأرباح</span>
+                </a>
+                <a href="#operations" class="menu-item" onclick="showPage('operations')">
+                    <span class="menu-icon"><i class="fas fa-exchange-alt"></i></span>
+                    <span>العمليات</span>
+                    <span class="menu-badge" id="operationsBadge">0</span>
+                </a>
+
+                <div class="menu-category">التقارير</div>
+                <a href="#reports" class="menu-item" onclick="showPage('reports')">
+                    <span class="menu-icon"><i class="fas fa-file-alt"></i></span>
+                    <span>التقارير</span>
+                </a>
+                <a href="#financial" class="menu-item" onclick="showPage('financial')">
+                    <span class="menu-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                    <span>التقارير المالية</span>
+                </a>
+
+                <div class="menu-category">النظام</div>
+                <a href="#calendar" class="menu-item" onclick="showPage('calendar')">
+                    <span class="menu-icon"><i class="fas fa-calendar-alt"></i></span>
+                    <span>التقويم</span>
+                </a>
+                <a href="#notifications" class="menu-item" onclick="toggleNotificationPanel()">
+                    <span class="menu-icon"><i class="fas fa-bell"></i></span>
+                    <span>الإشعارات</span>
+                    <span class="menu-badge" id="notificationBadge">0</span>
+                </a>
+                <a href="#settings" class="menu-item" onclick="showPage('settings')">
+                    <span class="menu-icon"><i class="fas fa-cog"></i></span>
+                    <span>الإعدادات</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
                     </div>
-                    <div class="new-folder-btn" title="مجلد جديد">
-                        <i class="fas fa-folder-plus"></i>
-                    </div>
-                    <div class="refresh-btn" title="تحديث">
-                        <i class="fas fa-sync-alt"></i>
+                    <div class="user-info">
+                        <div class="user-name">المدير</div>
+                        <div class="user-role">مسؤول النظام</div>
                     </div>
                 </div>
-            </div>
-            <div class="file-browser" id="file-browser">
-                <!-- هنا ستظهر الملفات والمجلدات -->
-            </div>
-            
-            <!-- قسم المفضلة والقوالب -->
-            <div class="snippets-section">
-                <div class="sidebar-section-header">
-                    <div class="section-title">قوالب جاهزة</div>
-                    <div class="section-toggle">
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-                <div class="snippets-list">
-                    <div class="snippet-item" data-snippet="html-template">
-                        <i class="fab fa-html5"></i> قالب HTML
-                    </div>
-                    <div class="snippet-item" data-snippet="css-reset">
-                        <i class="fab fa-css3-alt"></i> CSS Reset
-                    </div>
-                    <div class="snippet-item" data-snippet="responsive-layout">
-                        <i class="fas fa-mobile-alt"></i> تخطيط متجاوب
-                    </div>
-                    <div class="snippet-item" data-snippet="flex-grid">
-                        <i class="fas fa-th"></i> شبكة Flex
-                    </div>
-                    <div class="snippet-item" data-snippet="js-dom">
-                        <i class="fab fa-js"></i> DOM تفاعلي
-                    </div>
-                </div>
-            </div>
-            
-            <!-- إحصاءات المشروع -->
-            <div class="project-stats" id="project-stats">
-                <div class="stats-header">إحصاءات المشروع</div>
-                <div class="stats-content">
-                    <div class="stat-item">
-                        <div class="stat-label">عدد الملفات:</div>
-                        <div class="stat-value" id="files-count">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">عدد المجلدات:</div>
-                        <div class="stat-value" id="folders-count">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">حجم المشروع:</div>
-                        <div class="stat-value" id="project-size">0 KB</div>
-                    </div>
+                <div class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
                 </div>
             </div>
         </div>
 
-        <!-- منطقة المحتوى -->
-        <div class="content-area">
-            <!-- شريط التبويبات -->
-            <div class="tabs" id="tabs">
-                <!-- الألسنة ستضاف هنا باستخدام جافا سكريبت -->
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="header">
+                    <h1 class="page-title">لوحة التحكم</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="بحث...">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationBadgeHeader">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                        <!-- إضافة أيقونة المزامنة إلى شريط التنقل العلوي -->
+                        <!-- قم بإضافة هذا الكود بعد عنصر البحث وقبل زر الإشعارات في كل صفحة -->
+                        <div class="sync-controls">
+                            <div class="sync-btn" onclick="window.firebaseApp.showSyncSettings()" id="syncIcon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <span id="syncStatus" style="display: none;">غير متصل</span>
+                            <span id="lastSyncTime"
+                                style="font-size: 0.75rem; color: var(--gray-600); margin-right: 5px; display: none;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <div class="alert-icon">
+                        <i class="fas fa-info"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">مرحباً بك في النظام</div>
+                        <div class="alert-text" id="dashboardAlertText">مرحباً بك في نظام إدارة الاستثمار. اضغط على أي
+                            عنصر من القائمة الجانبية للتنقل.</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-bg primary">
+                            <i class="fas fa-users fa-4x"></i>
+                        </div>
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">إجمالي المستثمرين</div>
+                                <div class="card-value" id="totalInvestors">0</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="investorsChangeText">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon primary">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-bg success">
+                            <i class="fas fa-money-bill-wave fa-4x"></i>
+                        </div>
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">إجمالي الاستثمارات</div>
+                                <div class="card-value" id="totalInvestments">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="investmentsChangeText">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon success">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-bg warning">
+                            <i class="fas fa-hand-holding-usd fa-4x"></i>
+                        </div>
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">إجمالي الأرباح</div>
+                                <div class="card-value" id="totalProfits">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="profitsChangeText">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon warning">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-bg info">
+                            <i class="fas fa-exchange-alt fa-4x"></i>
+                        </div>
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">عدد المعاملات</div>
+                                <div class="card-value" id="totalTransactions">0</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="transactionsChangeText">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon info">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">تحليل الاستثمارات والأرباح</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light" id="dailyChartBtn"
+                                    onclick="switchChartPeriod('daily')">اليومي</button>
+                                <button class="btn btn-sm btn-primary" id="monthlyChartBtn"
+                                    onclick="switchChartPeriod('monthly')">الشهري</button>
+                                <button class="btn btn-sm btn-light" id="yearlyChartBtn"
+                                    onclick="switchChartPeriod('yearly')">السنوي</button>
+                            </div>
+                        </div>
+                        <div id="investmentChart" style="height: 300px; width: 100%;">
+                            <!-- Chart will be rendered here -->
+                            <div
+                                style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-chart-line fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">أحدث المستثمرين</div>
+                            <button class="btn btn-sm btn-primary" onclick="showPage('investors')">عرض الكل</button>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>المستثمر</th>
+                                    <th>المبلغ</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentInvestorsBody">
+                                <!-- Data will be dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">آخر المعاملات</div>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-light" onclick="printTable('recentTransactionsTable')">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                            <button class="btn btn-sm btn-primary" onclick="showPage('operations')">عرض الكل</button>
+                        </div>
+                    </div>
+                    <table class="table" id="recentTransactionsTable">
+                        <thead>
+                            <tr>
+                                <th>المستثمر</th>
+                                <th>العملية</th>
+                                <th>المبلغ</th>
+                                <th>التاريخ</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactionsBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- شريط البحث -->
-            <div class="search-bar" id="search-bar">
-                <div class="search-input-container">
-                    <input type="text" id="search-input" placeholder="بحث...">
-                    <input type="text" id="replace-input" placeholder="استبدال بـ...">
+            <!-- Analytics Page -->
+            <div id="analytics" class="page">
+                <div class="header">
+                    <h1 class="page-title">التحليلات</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="بحث...">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="search-buttons">
-                    <button id="search-prev" title="السابق">
-                        <i class="fas fa-arrow-up"></i>
-                    </button>
-                    <button id="search-next" title="التالي">
-                        <i class="fas fa-arrow-down"></i>
-                    </button>
-                    <button id="replace-btn" title="استبدال">
-                        <i class="fas fa-exchange-alt"></i>
-                    </button>
-                    <button id="replace-all-btn" title="استبدال الكل">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button id="close-search" title="إغلاق">
-                        <i class="fas fa-times"></i>
-                    </button>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchAnalyticsTab('overview')">نظرة عامة</div>
+                    <div class="tab" onclick="switchAnalyticsTab('investments')">الاستثمارات</div>
+                    <div class="tab" onclick="switchAnalyticsTab('profits')">الأرباح</div>
+                    <div class="tab" onclick="switchAnalyticsTab('investors')">المستثمرين</div>
+                    <div class="tab" onclick="switchAnalyticsTab('trends')">الاتجاهات</div>
+                </div>
+
+                <div id="analyticsOverview" class="analytics-tab-content active">
+                    <div class="dashboard-cards">
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">معدل النمو الشهري</div>
+                                    <div class="card-value" id="monthlyGrowthRate">0%</div>
+                                    <div class="card-change up">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span id="monthlyGrowthChange">0% من الشهر السابق</span>
+                                    </div>
+                                </div>
+                                <div class="card-icon primary">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">متوسط الاستثمار</div>
+                                    <div class="card-value" id="averageInvestment">0 د.ع</div>
+                                    <div class="card-change up">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span id="averageInvestmentChange">0% من الشهر السابق</span>
+                                    </div>
+                                </div>
+                                <div class="card-icon success">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">نسبة الاحتفاظ</div>
+                                    <div class="card-value" id="retentionRate">0%</div>
+                                    <div class="card-change down" id="retentionRateChangeContainer">
+                                        <i class="fas fa-arrow-down" id="retentionRateChangeIcon"></i>
+                                        <span id="retentionRateChange">0% من الشهر السابق</span>
+                                    </div>
+                                </div>
+                                <div class="card-icon warning">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <div class="card-title">إجمالي العائد</div>
+                                    <div class="card-value" id="totalReturn">0 د.ع</div>
+                                    <div class="card-change up">
+                                        <i class="fas fa-arrow-up"></i>
+                                        <span id="totalReturnChange">0% من الشهر السابق</span>
+                                    </div>
+                                </div>
+                                <div class="card-icon info">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">تحليل الأداء</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light"
+                                    onclick="switchPerformanceChartPeriod('daily')">اليومي</button>
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="switchPerformanceChartPeriod('monthly')">الشهري</button>
+                                <button class="btn btn-sm btn-light"
+                                    onclick="switchPerformanceChartPeriod('yearly')">السنوي</button>
+                                <button class="btn btn-sm btn-light" onclick="exportPerformanceChart()"><i
+                                        class="fas fa-download"></i> تصدير</button>
+                            </div>
+                        </div>
+                        <div id="performanceChart" style="height: 400px; width: 100%;">
+                            <!-- Chart will be rendered here -->
+                            <div
+                                style="height: 400px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-chart-bar fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="analyticsInvestments" class="analytics-tab-content">
+                    <!-- Investments Tab Content -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">توزيع الاستثمارات</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light" onclick="exportInvestmentsChart()"><i
+                                        class="fas fa-download"></i> تصدير</button>
+                            </div>
+                        </div>
+                        <div id="investmentsDistributionChart" style="height: 400px; width: 100%;">
+                            <div
+                                style="height: 400px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-chart-pie fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">إحصائيات الاستثمارات</div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>الفئة</th>
+                                    <th>عدد الاستثمارات</th>
+                                    <th>إجمالي المبلغ</th>
+                                    <th>متوسط المبلغ</th>
+                                    <th>النسبة المئوية</th>
+                                </tr>
+                            </thead>
+                            <tbody id="investmentsStatsTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="analyticsProfits" class="analytics-tab-content">
+                    <!-- Profits Tab Content -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">نمو الأرباح</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light"
+                                    onclick="switchProfitsChartPeriod('monthly')">شهري</button>
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="switchProfitsChartPeriod('quarterly')">ربع سنوي</button>
+                                <button class="btn btn-sm btn-light"
+                                    onclick="switchProfitsChartPeriod('yearly')">سنوي</button>
+                                <button class="btn btn-sm btn-light" onclick="exportProfitsChart()"><i
+                                        class="fas fa-download"></i> تصدير</button>
+                            </div>
+                        </div>
+                        <div id="profitsGrowthChart" style="height: 400px; width: 100%;">
+                            <div
+                                style="height: 400px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-chart-line fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">أعلى 5 مستثمرين من حيث الأرباح</div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>المستثمر</th>
+                                    <th>إجمالي الاستثمار</th>
+                                    <th>إجمالي الأرباح</th>
+                                    <th>نسبة العائد</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topInvestorsProfitsTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="analyticsInvestors" class="analytics-tab-content">
+                    <!-- Investors Tab Content -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">نمو عدد المستثمرين</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light" onclick="exportInvestorsChart()"><i
+                                        class="fas fa-download"></i> تصدير</button>
+                            </div>
+                        </div>
+                        <div id="investorsGrowthChart" style="height: 400px; width: 100%;">
+                            <div
+                                style="height: 400px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-users fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-layout">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">توزيع المستثمرين حسب المدينة</div>
+                            </div>
+                            <div id="investorsByCityChart" style="height: 300px; width: 100%;">
+                                <div
+                                    style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                    <div style="text-align: center; color: var(--gray-600);">
+                                        <i class="fas fa-map-marker-alt fa-3x" style="margin-bottom: 10px;"></i>
+                                        <p>سيتم عرض الرسم البياني هنا</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <div class="chart-title">توزيع المستثمرين حسب المهنة</div>
+                            </div>
+                            <div id="investorsByOccupationChart" style="height: 300px; width: 100%;">
+                                <div
+                                    style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                    <div style="text-align: center; color: var(--gray-600);">
+                                        <i class="fas fa-briefcase fa-3x" style="margin-bottom: 10px;"></i>
+                                        <p>سيتم عرض الرسم البياني هنا</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="analyticsTrends" class="analytics-tab-content">
+                    <!-- Trends Tab Content -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">اتجاهات النمو</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light" onclick="exportTrendsChart()"><i
+                                        class="fas fa-download"></i> تصدير</button>
+                            </div>
+                        </div>
+                        <div id="growthTrendsChart" style="height: 400px; width: 100%;">
+                            <div
+                                style="height: 400px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-chart-line fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <div class="alert-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">تحليل الاتجاهات</div>
+                            <div class="alert-text" id="trendsAnalysisText">
+                                يتم جمع البيانات وتحليلها لعرض اتجاهات النمو في النظام. سيتم تحديث هذا التحليل تلقائيًا
+                                كل شهر.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">التوقعات المستقبلية</div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>المؤشر</th>
+                                    <th>القيمة الحالية</th>
+                                    <th>التوقع (3 أشهر)</th>
+                                    <th>التوقع (6 أشهر)</th>
+                                    <th>التوقع (سنة)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="futurePredictionsTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- حاوية المحرر -->
-            <div class="editor-container" id="editor-container">
-                <div class="no-file-opened">
-                    <i class="fas fa-code"></i>
-                    <h2>مرحباً بك في محرر الأكواد والخادم المحلي</h2>
-                    <p>قم بإنشاء ملف جديد أو افتح ملفاً موجوداً من شريط المستكشف الجانبي للبدء. يمكنك أيضاً رفع ملفات من جهازك باستخدام زر "رفع ملفات".</p>
-                    <div class="quick-actions">
-                        <button class="quick-action-btn" data-action="new-html">
-                            <i class="fab fa-html5"></i>
-                            ملف HTML جديد
+            <!-- Investors Page -->
+            <div id="investors" class="page">
+                <div class="header">
+                    <h1 class="page-title">المستثمرين</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="investorSearchInput"
+                                placeholder="بحث عن مستثمر..." oninput="searchInvestors()">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <button class="btn btn-primary" onclick="openAddInvestorModal()">
+                            <i class="fas fa-plus"></i> إضافة مستثمر
                         </button>
-                        <button class="quick-action-btn" data-action="new-css">
-                            <i class="fab fa-css3-alt"></i>
-                            ملف CSS جديد
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">قائمة المستثمرين</div>
+                        <div class="table-actions">
+                            <button class="btn btn-light" onclick="exportInvestors()">
+                                <i class="fas fa-file-export"></i> تصدير
+                            </button>
+                            <button class="btn btn-light" onclick="importInvestors()">
+                                <i class="fas fa-file-import"></i> استيراد
+                            </button>
+                            <button class="btn btn-light" onclick="printTable('investorsTable')">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table" id="investorsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الاسم</th>
+                                <th>رقم الهاتف</th>
+                                <th>العنوان</th>
+                                <th>رقم البطاقة</th>
+                                <th>إجمالي الاستثمار</th>
+                                <th>إجمالي الأرباح</th>
+                                <th>تاريخ الانضمام</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="investorsTableBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Investments Page -->
+            <div id="investments" class="page">
+                <div class="header">
+                    <h1 class="page-title">الاستثمارات</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="investmentSearchInput" placeholder="بحث..."
+                                oninput="searchInvestments()">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <button class="btn btn-primary" onclick="openNewInvestmentModal()">
+                            <i class="fas fa-plus"></i> استثمار جديد
                         </button>
-                        <button class="quick-action-btn" data-action="new-js">
-                            <i class="fab fa-js"></i>
-                            ملف JavaScript جديد
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchInvestmentsTab('active')">الاستثمارات النشطة</div>
+                    <div class="tab" onclick="switchInvestmentsTab('closed')">الاستثمارات المغلقة</div>
+                    <div class="tab" onclick="switchInvestmentsTab('all')">جميع الاستثمارات</div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">الاستثمارات النشطة</div>
+                        <div class="table-actions">
+                            <button class="btn btn-light" onclick="exportInvestments()">
+                                <i class="fas fa-file-export"></i> تصدير
+                            </button>
+                            <button class="btn btn-light" onclick="printTable('investmentsTable')">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table" id="investmentsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>المستثمر</th>
+                                <th>المبلغ</th>
+                                <th>تاريخ الاستثمار</th>
+                                <th>الربح الشهري</th>
+                                <th>إجمالي الأرباح</th>
+                                <th>الحالة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="investmentsTableBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Profits Page -->
+            <div id="profits" class="page">
+                <div class="header">
+                    <h1 class="page-title">الأرباح</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="openPayProfitModal()">
+                            <i class="fas fa-money-bill"></i> دفع أرباح
                         </button>
-                        <button class="quick-action-btn" data-action="upload">
-                            <i class="fas fa-upload"></i>
-                            رفع ملفات
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchProfitsTab('summary')">ملخص الأرباح</div>
+                    <div class="tab" onclick="switchProfitsTab('paid')">الأرباح المدفوعة</div>
+                    <div class="tab" onclick="switchProfitsTab('due')">الأرباح المستحقة</div>
+                    <div class="tab" onclick="switchProfitsTab('projections')">توقعات الأرباح</div>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">إجمالي الأرباح</div>
+                                <div class="card-value" id="profitsTotal">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="profitsTotalChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon primary">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">الأرباح المدفوعة</div>
+                                <div class="card-value" id="profitsPaid">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="profitsPaidChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">الأرباح المستحقة</div>
+                                <div class="card-value" id="profitsDue">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="profitsDueChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon warning">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">متوسط العائد الشهري</div>
+                                <div class="card-value" id="profitsMonthlyAverage">0%</div>
+                                <div class="card-change">
+                                    <i class="fas fa-minus"></i>
+                                    <span id="profitsMonthlyAverageChange">ثابت</span>
+                                </div>
+                            </div>
+                            <div class="card-icon info">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">تحليل الأرباح</div>
+                        <div class="chart-actions">
+                            <button class="btn btn-sm btn-light"
+                                onclick="switchProfitsAnalysisChart('daily')">اليومي</button>
+                            <button class="btn btn-sm btn-primary"
+                                onclick="switchProfitsAnalysisChart('monthly')">الشهري</button>
+                            <button class="btn btn-sm btn-light"
+                                onclick="switchProfitsAnalysisChart('yearly')">السنوي</button>
+                            <button class="btn btn-sm btn-light" onclick="exportProfitsAnalysisChart()"><i
+                                    class="fas fa-download"></i> تصدير</button>
+                        </div>
+                    </div>
+                    <div id="profitsChart" style="height: 300px; width: 100%;">
+                        <!-- Chart will be rendered here -->
+                        <div
+                            style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                            <div style="text-align: center; color: var(--gray-600);">
+                                <i class="fas fa-chart-line fa-3x" style="margin-bottom: 10px;"></i>
+                                <p>سيتم عرض الرسم البياني هنا</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">تفاصيل الأرباح</div>
+                        <div class="table-actions">
+                            <button class="btn btn-light" onclick="exportProfits()">
+                                <i class="fas fa-file-export"></i> تصدير
+                            </button>
+                            <button class="btn btn-light" onclick="printTable('profitsTable')">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table" id="profitsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>المستثمر</th>
+                                <th>مبلغ الاستثمار</th>
+                                <th>تاريخ الاستثمار</th>
+                                <th>الربح الشهري</th>
+                                <th>إجمالي الأرباح</th>
+                                <th>الأرباح المدفوعة</th>
+                                <th>الأرباح المستحقة</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profitsTableBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Operations Page -->
+            <div id="operations" class="page">
+                <div class="header">
+                    <h1 class="page-title">العمليات</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="operationsSearchInput" placeholder="بحث..."
+                                oninput="searchOperations()">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchOperationsTab('all')">جميع العمليات</div>
+                    <div class="tab" onclick="switchOperationsTab('investments')">الاستثمارات</div>
+                    <div class="tab" onclick="switchOperationsTab('withdrawals')">السحوبات</div>
+                    <div class="tab" onclick="switchOperationsTab('profits')">الأرباح</div>
+                    <div class="tab" onclick="switchOperationsTab('pending')">معلقة</div>
+                </div>
+
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2 class="form-title">إجراء عملية جديدة</h2>
+                        <p class="form-subtitle">اختر نوع العملية التي تريد إجراءها</p>
+                    </div>
+                    <div class="form-row">
+                        <button class="btn btn-success" onclick="openNewInvestmentModal()">
+                            <i class="fas fa-plus"></i> استثمار جديد
+                        </button>
+                        <button class="btn btn-warning" onclick="openWithdrawModal()">
+                            <i class="fas fa-minus"></i> سحب
+                        </button>
+                        <button class="btn btn-primary" onclick="openPayProfitModal()">
+                            <i class="fas fa-money-bill"></i> دفع أرباح
                         </button>
                     </div>
                 </div>
-                <div id="editor" style="display: none;"></div>
-                <div class="editor-overlay" id="editor-overlay">
-                    <div class="autosave-notification">
-                        <i class="fas fa-save"></i> تم الحفظ تلقائياً
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">سجل العمليات</div>
+                        <div class="table-actions">
+                            <button class="btn btn-light" onclick="exportOperations()">
+                                <i class="fas fa-file-export"></i> تصدير
+                            </button>
+                            <button class="btn btn-light" onclick="printTable('operationsTable')">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table" id="operationsTable">
+                        <thead>
+                            <tr>
+                                <th>رقم العملية</th>
+                                <th>المستثمر</th>
+                                <th>نوع العملية</th>
+                                <th>المبلغ</th>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>الحالة</th>
+                                <th>ملاحظات</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operationsTableBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports" class="page">
+                <div class="header">
+                    <h1 class="page-title">التقارير</h1>
+                    <div class="header-actions">
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
                     </div>
                 </div>
-                <div id="live-preview" class="live-preview"></div>
-            </div>
 
-            <!-- حاوية المعاينة -->
-            <div class="preview-container" id="preview-container">
-                <iframe id="preview-iframe"></iframe>
-                <div class="preview-controls">
-                    <button id="preview-refresh" title="تحديث">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button id="preview-back" title="العودة للمحرر">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <button id="preview-console" title="إظهار وحدة التحكم">
-                        <i class="fas fa-terminal"></i>
-                    </button>
-                    <select id="preview-device">
-                        <option value="responsive">تفاعلي</option>
-                        <option value="desktop">سطح المكتب (1920×1080)</option>
-                        <option value="laptop">حاسوب محمول (1366×768)</option>
-                        <option value="tablet">جهاز لوحي (768×1024)</option>
-                        <option value="mobile">هاتف ذكي (375×667)</option>
-                    </select>
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2 class="form-title">إنشاء تقرير مخصص</h2>
+                        <p class="form-subtitle">قم بتحديد نوع التقرير والفترة الزمنية</p>
+                    </div>
+                    <form id="customReportForm" onsubmit="createCustomReport(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">نوع التقرير</label>
+                                <select class="form-select" id="reportType" required>
+                                    <option value="">اختر نوع التقرير</option>
+                                    <option value="investors">المستثمرين</option>
+                                    <option value="investments">الاستثمارات</option>
+                                    <option value="profits">الأرباح</option>
+                                    <option value="operations">العمليات</option>
+                                    <option value="financial">التقرير المالي</option>
+                                    <option value="summary">ملخص عام</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">المستثمر (اختياري)</label>
+                                <select class="form-select" id="reportInvestor">
+                                    <option value="">جميع المستثمرين</option>
+                                    <!-- Will be populated by JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">من تاريخ</label>
+                                <input type="date" class="form-control" id="reportFromDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">إلى تاريخ</label>
+                                <input type="date" class="form-control" id="reportToDate">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">تنسيق التقرير</label>
+                            <div class="form-row">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="formatTable" name="reportFormat"
+                                        value="table" checked>
+                                    <label class="form-check-label" for="formatTable">جدول</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="formatChart" name="reportFormat"
+                                        value="chart">
+                                    <label class="form-check-label" for="formatChart">رسم بياني</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="formatPdf" name="reportFormat"
+                                        value="pdf">
+                                    <label class="form-check-label" for="formatPdf">PDF</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-alt"></i> إنشاء التقرير
+                            </button>
+                            <button type="reset" class="btn btn-light">
+                                <i class="fas fa-redo"></i> إعادة تعيين
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchReportsTab('recent')">التقارير الأخيرة</div>
+                    <div class="tab" onclick="switchReportsTab('saved')">التقارير المحفوظة</div>
+                    <div class="tab" onclick="switchReportsTab('scheduled')">التقارير المجدولة</div>
+                </div>
+
+                <div class="table-container" id="recentReports">
+                    <div class="table-header">
+                        <div class="table-title">التقارير الأخيرة</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>اسم التقرير</th>
+                                <th>النوع</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>المنشئ</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentReportsTableBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-container" id="reportResult" style="display: none;">
+                    <div class="table-header">
+                        <div class="table-title" id="reportTitle">نتائج التقرير</div>
+                        <div class="table-actions">
+                            <button class="btn btn-light" onclick="printTable('reportTable')">
+                                <i class="fas fa-print"></i> طباعة
+                            </button>
+                            <button class="btn btn-primary" onclick="saveReport()">
+                                <i class="fas fa-save"></i> حفظ التقرير
+                            </button>
+                            <button class="btn btn-light" onclick="closeReport()">
+                                <i class="fas fa-times"></i> إغلاق
+                            </button>
+                        </div>
+                    </div>
+                    <div id="reportContent">
+                        <!-- Data will be dynamically populated -->
+                    </div>
                 </div>
             </div>
 
-            <!-- شريط الحالة -->
-            <div class="status-bar">
-                <span id="cursor-position">السطر: 1، العمود: 1</span>
-                <span class="language" id="language-indicator">لغة: لم يتم تحديدها</span>
-                <span class="encoding">UTF-8</span>
-                <span class="autosave-status" id="autosave-status">حفظ تلقائي: مفعل</span>
-                <div class="editor-controls">
-                    <select id="editor-theme" title="سمة المحرر">
-                        <option value="monokai">Monokai</option>
-                        <option value="github">GitHub</option>
-                        <option value="tomorrow_night">Tomorrow Night</option>
-                        <option value="solarized_dark">Solarized Dark</option>
-                        <option value="solarized_light">Solarized Light</option>
-                        <option value="twilight">Twilight</option>
-                        <option value="terminal">Terminal</option>
-                    </select>
-                    <select id="editor-font-size" title="حجم الخط">
-                        <option value="12px">12px</option>
-                        <option value="14px" selected>14px</option>
-                        <option value="16px">16px</option>
-                        <option value="18px">18px</option>
-                        <option value="20px">20px</option>
-                    </select>
+            <!-- Financial Reports Page -->
+            <div id="financial" class="page">
+                <div class="header">
+                    <h1 class="page-title">التقارير المالية</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" placeholder="بحث...">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchFinancialTab('summary')">ملخص مالي</div>
+                    <div class="tab" onclick="switchFinancialTab('income')">تقرير الدخل</div>
+                    <div class="tab" onclick="switchFinancialTab('cashflow')">التدفق النقدي</div>
+                    <div class="tab" onclick="switchFinancialTab('projections')">التوقعات المالية</div>
+                </div>
+
+                <div class="dashboard-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">إجمالي الدخل</div>
+                                <div class="card-value" id="totalIncome">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="totalIncomeChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon primary">
+                                <i class="fas fa-money-check-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">إجمالي المصروفات</div>
+                                <div class="card-value" id="totalExpenses">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="totalExpensesChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon danger">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">صافي الربح</div>
+                                <div class="card-value" id="netProfit">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="netProfitChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon success">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">الرصيد الحالي</div>
+                                <div class="card-value" id="currentBalance">0 د.ع</div>
+                                <div class="card-change up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="currentBalanceChange">0% منذ الشهر الماضي</span>
+                                </div>
+                            </div>
+                            <div class="card-icon info">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">تحليل الإيرادات والمصروفات</div>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-light"
+                                    onclick="switchFinancialChartPeriod('daily')">اليومي</button>
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="switchFinancialChartPeriod('monthly')">الشهري</button>
+                                <button class="btn btn-sm btn-light"
+                                    onclick="switchFinancialChartPeriod('yearly')">السنوي</button>
+                                <button class="btn btn-sm btn-light" onclick="exportFinancialChart()"><i
+                                        class="fas fa-download"></i> تصدير</button>
+                            </div>
+                        </div>
+                        <div id="financialChart" style="height: 300px; width: 100%;">
+                            <!-- Chart will be rendered here -->
+                            <div
+                                style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="text-align: center; color: var(--gray-600);">
+                                    <i class="fas fa-chart-bar fa-3x" style="margin-bottom: 10px;"></i>
+                                    <p>سيتم عرض الرسم البياني هنا</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">ملخص الدخل</div>
+                            <button class="btn btn-sm btn-primary" onclick="generateIncomeReport()">
+                                <i class="fas fa-file-export"></i> تقرير كامل
+                            </button>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>البند</th>
+                                    <th>المبلغ</th>
+                                    <th>التغيير</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2 class="form-title">تقرير مالي مخصص</h2>
+                        <p class="form-subtitle">قم بتحديد نوع التقرير والفترة الزمنية</p>
+                    </div>
+                    <form id="financialReportForm" onsubmit="generateFinancialReport(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">نوع التقرير</label>
+                                <select class="form-select" id="financialReportType" required>
+                                    <option value="">اختر نوع التقرير</option>
+                                    <option value="income">تقرير الدخل</option>
+                                    <option value="expense">تقرير المصروفات</option>
+                                    <option value="cashflow">تقرير التدفق النقدي</option>
+                                    <option value="profit">تقرير الأرباح والخسائر</option>
+                                    <option value="balance">تقرير الميزانية</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">الفترة</label>
+                                <select class="form-select" id="financialReportPeriod" required
+                                    onchange="toggleCustomDateRange()">
+                                    <option value="">اختر الفترة</option>
+                                    <option value="daily">يومي</option>
+                                    <option value="weekly">أسبوعي</option>
+                                    <option value="monthly">شهري</option>
+                                    <option value="quarterly">ربع سنوي</option>
+                                    <option value="yearly">سنوي</option>
+                                    <option value="custom">مخصص</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row" id="customDateRange" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">من تاريخ</label>
+                                <input type="date" class="form-control" id="financialFromDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">إلى تاريخ</label>
+                                <input type="date" class="form-control" id="financialToDate">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-alt"></i> إنشاء التقرير
+                            </button>
+                            <button type="reset" class="btn btn-light">
+                                <i class="fas fa-redo"></i> إعادة تعيين
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Calendar Page -->
+            <div id="calendar" class="page">
+                <div class="header">
+                    <h1 class="page-title">التقويم</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="addEvent()">
+                            <i class="fas fa-plus"></i> إضافة حدث
+                        </button>
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchCalendarView('month')">شهري</div>
+                    <div class="tab" onclick="switchCalendarView('week')">أسبوعي</div>
+                    <div class="tab" onclick="switchCalendarView('day')">يومي</div>
+                    <div class="tab" onclick="switchCalendarView('agenda')">الأجندة</div>
+                </div>
+
+                <div class="form-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <button class="btn btn-light" onclick="prevMonth()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="form-group" style="flex: 1; text-align: center;">
+                            <h2 id="currentMonth">مايو 2025</h2>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-light" onclick="nextMonth()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calendar-container"
+                    style="background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 20px; margin-bottom: 30px;">
+                    <div class="calendar-header"
+                        style="display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 10px;">
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            الأحد</div>
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            الإثنين</div>
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            الثلاثاء</div>
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            الأربعاء</div>
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            الخميس</div>
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            الجمعة</div>
+                        <div class="calendar-day-name" style="text-align: center; font-weight: 600; padding: 10px;">
+                            السبت</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"
+                        style="display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(5, 1fr); gap: 5px; height: 600px;">
+                        <!-- Calendar will be dynamically populated -->
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <div class="table-title">الأحداث القادمة</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>العنوان</th>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>النوع</th>
+                                <th>ملاحظات</th>
+                                <th>إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="upcomingEventsTableBody">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="header">
+                    <h1 class="page-title">الإعدادات</h1>
+                    <div class="header-actions">
+                        <div class="notification-btn" onclick="toggleNotificationPanel()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">0</span>
+                        </div>
+                        <div class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchSettingsTab('general')">عام</div>
+                    <div class="tab" onclick="switchSettingsTab('investment')">الاستثمار</div>
+                    <div class="tab" onclick="switchSettingsTab('profile')">الملف الشخصي</div>
+                    <div class="tab" onclick="switchSettingsTab('notifications')">الإشعارات</div>
+                    <div class="tab" onclick="switchSettingsTab('backup')">النسخ الاحتياطي</div>
+                    <div class="tab" onclick="switchSettingsTab('system')">النظام</div>
+                    <div class="tab" onclick="switchSettingsTab('sync')">المزامنة والنسخ الاحتياطي</div>
+                </div>
+
+                <div id="generalSettings" class="settings-tab-content active">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">إعدادات عامة</h2>
+                            <p class="form-subtitle">إعدادات النظام الأساسية</p>
+                        </div>
+                        <form id="generalSettingsForm" onsubmit="saveGeneralSettings(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">اسم الشركة</label>
+                                    <input type="text" class="form-control" id="companyName"
+                                        value="شركة الاستثمار العراقية">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">شعار الشركة</label>
+                                    <input type="file" class="form-control" id="companyLogo">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">عنوان الشركة</label>
+                                    <input type="text" class="form-control" id="companyAddress"
+                                        value="الحلة، بابل، العراق">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">رقم الهاتف</label>
+                                    <input type="text" class="form-control" id="companyPhone" value="07701234567">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="companyEmail"
+                                        value="info@iraqinvest.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">الموقع الإلكتروني</label>
+                                    <input type="text" class="form-control" id="companyWebsite"
+                                        value="www.iraqinvest.com">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">اللغة</label>
+                                    <select class="form-select" id="language">
+                                        <option value="ar" selected>العربية</option>
+                                        <option value="en">الإنجليزية</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">المنطقة الزمنية</label>
+                                    <select class="form-select" id="timezone">
+                                        <option value="Asia/Baghdad" selected>بغداد (GMT+3)</option>
+                                        <option value="Asia/Dubai">دبي (GMT+4)</option>
+                                        <option value="Europe/London">لندن (GMT+0)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ الإعدادات
+                                </button>
+                                <button type="reset" class="btn btn-light">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="investmentSettings" class="settings-tab-content">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">إعدادات الاستثمار</h2>
+                            <p class="form-subtitle">إعدادات الاستثمار والأرباح</p>
+                        </div>
+                        <form id="investmentSettingsForm" onsubmit="saveInvestmentSettings(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">نسبة الربح الشهرية (%)</label>
+                                    <input type="number" class="form-control" id="monthlyProfitRate" step="0.01"
+                                        value="1.75" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">الحد الأدنى للاستثمار</label>
+                                    <input type="number" class="form-control" id="minInvestment" value="1000000"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">فترة توزيع الأرباح</label>
+                                    <select class="form-select" id="profitDistributionPeriod">
+                                        <option value="monthly" selected>شهرياً</option>
+                                        <option value="quarterly">ربع سنوي</option>
+                                        <option value="yearly">سنوياً</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">يوم توزيع الأرباح</label>
+                                    <input type="number" class="form-control" id="profitDistributionDay" min="1"
+                                        max="31" value="1" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">رسوم السحب المبكر (%)</label>
+                                    <input type="number" class="form-control" id="earlyWithdrawalFee" step="0.01"
+                                        value="0.5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">الحد الأقصى للسحب الجزئي (%)</label>
+                                    <input type="number" class="form-control" id="maxPartialWithdrawal" step="1"
+                                        value="50" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">عملة النظام</label>
+                                    <select class="form-select" id="currency">
+                                        <option value="IQD" selected>دينار عراقي</option>
+                                        <option value="USD">دولار أمريكي</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">العملات المقبولة</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="acceptIQD" checked>
+                                        <label class="form-check-label" for="acceptIQD">دينار عراقي</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="acceptUSD" checked>
+                                        <label class="form-check-label" for="acceptUSD">دولار أمريكي</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ الإعدادات
+                                </button>
+                                <button type="reset" class="btn btn-light">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="profileSettings" class="settings-tab-content">
+                    <!-- Profile Settings Content -->
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">الملف الشخصي</h2>
+                            <p class="form-subtitle">إدارة معلومات الملف الشخصي</p>
+                        </div>
+                        <form id="profileSettingsForm" onsubmit="saveProfileSettings(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">الاسم الكامل</label>
+                                    <input type="text" class="form-control" id="userFullName" value="المدير">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" id="userEmail"
+                                        value="admin@iraqinvest.com">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">كلمة المرور الحالية</label>
+                                    <input type="password" class="form-control" id="currentPassword"
+                                        placeholder="أدخل كلمة المرور الحالية">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">كلمة المرور الجديدة</label>
+                                    <input type="password" class="form-control" id="newPassword"
+                                        placeholder="أدخل كلمة المرور الجديدة">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">تأكيد كلمة المرور</label>
+                                    <input type="password" class="form-control" id="confirmPassword"
+                                        placeholder="أدخل كلمة المرور الجديدة مرة أخرى">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">الصورة الشخصية</label>
+                                    <input type="file" class="form-control" id="userAvatar">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ التغييرات
+                                </button>
+                                <button type="reset" class="btn btn-light">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="notificationSettings" class="settings-tab-content">
+                    <!-- Notification Settings Content -->
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">إعدادات الإشعارات</h2>
+                            <p class="form-subtitle">تخصيص إعدادات الإشعارات</p>
+                        </div>
+                        <form id="notificationSettingsForm" onsubmit="saveNotificationSettings(event)">
+                            <div class="form-group">
+                                <h3 class="form-subtitle">إشعارات النظام</h3>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="systemNotifications" checked>
+                                    <label class="form-check-label" for="systemNotifications">إشعارات النظام</label>
+                                    <p class="form-text">تلقي إشعارات حول حالة النظام والتحديثات</p>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="loginNotifications" checked>
+                                    <label class="form-check-label" for <p class="form-text">تلقي إشعارات عند موعد توزيع
+                                        الأرباح</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <h3 class="form-subtitle">طرق الإشعار</h3>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="emailNotifications" checked>
+                                    <label class="form-check-label" for="emailNotifications">البريد الإلكتروني</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="smsNotifications">
+                                    <label class="form-check-label" for="smsNotifications">الرسائل النصية (SMS)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="pushNotifications" checked>
+                                    <label class="form-check-label" for="pushNotifications">إشعارات المتصفح</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <h3 class="form-subtitle">توقيت الإشعارات</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">وقت البدء</label>
+                                        <input type="time" class="form-control" id="notificationStartTime"
+                                            value="09:00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">وقت الانتهاء</label>
+                                        <input type="time" class="form-control" id="notificationEndTime" value="18:00">
+                                    </div>
+                                </div>
+                                <p class="form-text">لن يتم إرسال الإشعارات خارج هذه الأوقات إلا في حالات الطوارئ</p>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ الإعدادات
+                                </button>
+                                <button type="reset" class="btn btn-light">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="backupSettings" class="settings-tab-content">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">النسخ الاحتياطي واستعادة البيانات</h2>
+                            <p class="form-subtitle">إدارة البيانات والنسخ الاحتياطي</p>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">إنشاء نسخة احتياطية</label>
+                                <button class="btn btn-primary" onclick="createBackup()">
+                                    <i class="fas fa-download"></i> إنشاء نسخة احتياطية
+                                </button>
+                                <p class="form-text">قم بإنشاء نسخة احتياطية كاملة من جميع بيانات النظام.</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">استعادة من نسخة احتياطية</label>
+                                <input type="file" class="form-control" id="restoreFile" accept=".json">
+                                <button class="btn btn-warning" onclick="restoreBackup()" style="margin-top: 10px;">
+                                    <i class="fas fa-upload"></i> استعادة
+                                </button>
+                                <p class="form-text">تحذير: سيتم استبدال جميع البيانات الحالية بالبيانات من النسخة
+                                    الاحتياطية.</p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">النسخ الاحتياطية السابقة</label>
+                                <select class="form-select" id="previousBackups" size="5" style="height: auto;">
+                                    <!-- Will be populated by JavaScript -->
+                                </select>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn btn-light btn-sm" onclick="downloadSelectedBackup()">
+                                        <i class="fas fa-download"></i> تنزيل
+                                    </button>
+                                    <button class="btn btn-light btn-sm" onclick="restoreSelectedBackup()">
+                                        <i class="fas fa-upload"></i> استعادة
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteSelectedBackup()">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">تصدير البيانات</label>
+                            <div class="form-row">
+                                <button class="btn btn-light" onclick="exportInvestors()">
+                                    <i class="fas fa-file-export"></i> المستثمرين
+                                </button>
+                                <button class="btn btn-light" onclick="exportInvestments()">
+                                    <i class="fas fa-file-export"></i> الاستثمارات
+                                </button>
+                                <button class="btn btn-light" onclick="exportOperations()">
+                                    <i class="fas fa-file-export"></i> العمليات
+                                </button>
+                                <button class="btn btn-light" onclick="exportReports()">
+                                    <i class="fas fa-file-export"></i> التقارير
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="systemSettings" class="settings-tab-content">
+                    <!-- System Settings Content -->
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">إعدادات النظام</h2>
+                            <p class="form-subtitle">إعدادات متقدمة للنظام</p>
+                        </div>
+                        <form id="systemSettingsForm" onsubmit="saveSystemSettings(event)">
+                            <div class="form-group">
+                                <h3 class="form-subtitle">الواجهة</h3>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="darkMode">
+                                    <label class="form-check-label" for="darkMode">الوضع الليلي</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="compactMode">
+                                    <label class="form-check-label" for="compactMode">الوضع المضغوط</label>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">حجم الخط</label>
+                                        <select class="form-select" id="fontSize">
+                                            <option value="small">صغير</option>
+                                            <option value="medium" selected>متوسط</option>
+                                            <option value="large">كبير</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">اللون الأساسي</label>
+                                        <input type="color" class="form-control" id="primaryColor" value="#3498db">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <h3 class="form-subtitle">الأداء</h3>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enableAnimations" checked>
+                                    <label class="form-check-label" for="enableAnimations">تفعيل الرسوم المتحركة</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enableAutoSave" checked>
+                                    <label class="form-check-label" for="enableAutoSave">الحفظ التلقائي</label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">فترة الحفظ التلقائي (بالدقائق)</label>
+                                    <input type="number" class="form-control" id="autoSaveInterval" min="1" value="5">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <h3 class="form-subtitle">الأمان</h3>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enableTwoFactor">
+                                    <label class="form-check-label" for="enableTwoFactor">تفعيل المصادقة
+                                        الثنائية</label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">مدة الجلسة (بالدقائق)</label>
+                                    <input type="number" class="form-control" id="sessionDuration" min="5" value="30">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">سياسة كلمة المرور</label>
+                                    <select class="form-select" id="passwordPolicy">
+                                        <option value="low">ضعيفة</option>
+                                        <option value="medium" selected>متوسطة</option>
+                                        <option value="high">قوية</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <h3 class="form-subtitle">تكامل API</h3>
+                                <div class="form-group">
+                                    <label class="form-label">مفتاح API</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="apiKey"
+                                            value="****************************************">
+                                        <button class="btn btn-light" type="button" onclick="toggleApiKeyVisibility()">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-light" type="button" onclick="generateNewApiKey()">
+                                            <i class="fas fa-sync"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enableApiAccess" checked>
+                                    <label class="form-check-label" for="enableApiAccess">تفعيل وصول API</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ الإعدادات
+                                </button>
+                                <button type="reset" class="btn btn-light">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="syncSettings" class="settings-tab-content">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">إعدادات المزامنة</h2>
+                            <p class="form-subtitle">إعدادات مزامنة البيانات مع Firebase</p>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="syncEnabled"
+                                    onchange="toggleSync(this.checked)">
+                                <label class="form-check-label" for="syncEnabled">تفعيل المزامنة مع Firebase</label>
+                            </div>
+                            <p class="form-text">سيتم مزامنة البيانات تلقائيًا كل 5 دقائق وعند إجراء تغييرات.</p>
+                        </div>
+
+                        <div id="connectionInfo" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">حالة الاتصال</label>
+                                <div class="alert alert-info">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-info-circle"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <div class="alert-title">غير متصل</div>
+                                        <div class="alert-text">يرجى تسجيل الدخول لتفعيل المزامنة</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <button class="btn btn-primary" onclick="window.firebaseApp.showLoginDialog()">
+                                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                                </button>
+                                <button class="btn btn-light" onclick="window.firebaseApp.signOut()" id="signOutButton"
+                                    style="display: none;">
+                                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">النسخ الاحتياطي</h2>
+                            <p class="form-subtitle">إدارة النسخ الاحتياطية في Firebase</p>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">إنشاء نسخة احتياطية</label>
+                                <button class="btn btn-primary" onclick="createFirebaseBackupFromSettings()">
+                                    <i class="fas fa-cloud-upload-alt"></i> إنشاء نسخة احتياطية في Firebase
+                                </button>
+                                <p class="form-text">قم بإنشاء نسخة احتياطية كاملة من جميع بيانات النظام في Firebase.
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">استعادة نسخة احتياطية</label>
+                                <button class="btn btn-info" onclick="window.firebaseApp.showSyncSettings()">
+                                    <i class="fas fa-cloud-download-alt"></i> إدارة النسخ الاحتياطية
+                                </button>
+                                <p class="form-text">عرض واستعادة النسخ الاحتياطية المخزنة في Firebase.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">النسخ الاحتياطية التلقائية</label>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="autoBackupEnabled">
+                                <label class="form-check-label" for="autoBackupEnabled">تفعيل النسخ الاحتياطي
+                                    التلقائي</label>
+                            </div>
+                            <select class="form-select" id="autoBackupFrequency" style="margin-top: 10px;">
+                                <option value="daily">يوميًا</option>
+                                <option value="weekly" selected>أسبوعيًا</option>
+                                <option value="monthly">شهريًا</option>
+                            </select>
+                            <p class="form-text">سيتم إنشاء نسخة احتياطية تلقائيًا حسب الجدول المحدد.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">الأنشطة والسجلات</h2>
+                            <p class="form-subtitle">إدارة سجلات النظام</p>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="activityLoggingEnabled" checked>
+                                <label class="form-check-label" for="activityLoggingEnabled">تفعيل تسجيل الأنشطة</label>
+                            </div>
+                            <p class="form-text">سيتم تسجيل جميع الأنشطة في النظام في Firebase.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary" onclick="window.firebaseApp.showActivitiesLog()">
+                                <i class="fas fa-history"></i> عرض سجل الأنشطة
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" onclick="saveSyncSettings()">
+                            <i class="fas fa-save"></i> حفظ الإعدادات
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- وحدة التحكم للتطبيق -->
-    <div class="console-container" id="console-container">
-        <div class="console-header">
-            <h3>وحدة التحكم</h3>
-            <div class="console-buttons">
-                <button class="console-button console-clear" id="console-clear">
-                    <i class="fas fa-trash"></i> مسح
-                </button>
-                <button class="console-button console-close" id="console-close">
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h2 class="notification-title">الإشعارات</h2>
+            <div class="modal-close" onclick="toggleNotificationPanel()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <!-- Notifications will be dynamically populated -->
+        </div>
+        <div class="notification-actions">
+            <button class="btn btn-light" onclick="markAllAsRead()">
+                <i class="fas fa-check-double"></i> تعيين الكل كمقروء
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Investor Modal -->
+    <div class="modal-overlay" id="addInvestorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">إضافة مستثمر جديد</h2>
+                <div class="modal-close" onclick="closeModal('addInvestorModal')">
                     <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <div class="modal-tab active" onclick="switchModalTab('investorInfo', 'addInvestorModal')">معلومات
+                        المستثمر</div>
+                    <div class="modal-tab" onclick="switchModalTab('investmentInfo', 'addInvestorModal')">معلومات
+                        الاستثمار</div>
+                    <div class="modal-tab" onclick="switchModalTab('documents', 'addInvestorModal')">المستندات</div>
+                </div>
+                <div class="modal-tab-content active" id="investorInfo">
+                    <form id="investorForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">الاسم الكامل</label>
+                                <input type="text" class="form-control" id="investorName" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="investorPhone" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">البريد الإلكتروني</label>
+                                <input type="email" class="form-control" id="investorEmail">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">تاريخ الميلاد</label>
+                                <input type="date" class="form-control" id="investorBirthdate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">العنوان</label>
+                                <input type="text" class="form-control" id="investorAddress" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">المدينة</label>
+                                <input type="text" class="form-control" id="investorCity" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">رقم البطاقة الشخصية</label>
+                                <input type="text" class="form-control" id="investorIdCard" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">تاريخ إصدار البطاقة</label>
+                                <input type="date" class="form-control" id="investorIdCardDate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">المهنة</label>
+                                <input type="text" class="form-control" id="investorOccupation">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">ملاحظات</label>
+                                <textarea class="form-control" id="investorNotes" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-tab-content" id="investmentInfo">
+                    <form id="initialInvestmentForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">المبلغ (دينار عراقي)</label>
+                                <input type="number" class="form-control" id="initialInvestmentAmount" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">تاريخ الاستثمار</label>
+                                <input type="date" class="form-control" id="initialInvestmentDate" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">طريقة الدفع</label>
+                                <select class="form-select" id="initialInvestmentMethod">
+                                    <option value="cash">نقداً</option>
+                                    <option value="check">شيك</option>
+                                    <option value="transfer">حوالة بنكية</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">رقم المرجع</label>
+                                <input type="text" class="form-control" id="initialInvestmentReference">
+                                <p class="form-text">رقم الشيك أو رقم الحوالة إن وجد</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الربح الشهري المتوقع</label>
+                            <input type="text" class="form-control" id="initialExpectedProfit" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" id="initialInvestmentNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-tab-content" id="documents">
+                    <div class="form-group">
+                        <label class="form-label">صورة البطاقة الشخصية</label>
+                        <input type="file" class="form-control" id="investorIdCardImage">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">عقد الاستثمار</label>
+                        <input type="file" class="form-control" id="investmentContractFile">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">مستندات إضافية</label>
+                        <input type="file" class="form-control" id="additionalDocuments" multiple>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" onclick="closeModal('addInvestorModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveInvestor()">حفظ المستثمر</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Investment Modal -->
+    <div class="modal-overlay" id="newInvestmentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">استثمار جديد</h2>
+                <div class="modal-close" onclick="closeModal('newInvestmentModal')">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="newInvestmentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">المستثمر</label>
+                            <select class="form-select" id="investmentInvestor" required>
+                                <option value="">اختر المستثمر</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">المبلغ (دينار عراقي)</label>
+                            <input type="number" class="form-control" id="investmentAmount" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">تاريخ الاستثمار</label>
+                            <input type="date" class="form-control" id="investmentDate" required>
+                            <div id="daysMessage" class="form-text" style="color: var(--warning-color);"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">طريقة الدفع</label>
+                            <select class="form-select" id="investmentMethod">
+                                <option value="cash">نقداً</option>
+                                <option value="check">شيك</option>
+                                <option value="transfer">حوالة بنكية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">رقم المرجع</label>
+                            <input type="text" class="form-control" id="investmentReference">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الربح الشهري المتوقع</label>
+                            <input type="text" class="form-control" id="expectedProfit" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="investmentNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" onclick="closeModal('newInvestmentModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveInvestment()">تأكيد الاستثمار</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal-overlay" id="withdrawModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">سحب مبلغ</h2>
+                <div class="modal-close" onclick="closeModal('withdrawModal')">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="withdrawForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">المستثمر</label>
+                            <select class="form-select" id="withdrawInvestor" required>
+                                <option value="">اختر المستثمر</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الاستثمار</label>
+                            <select class="form-select" id="withdrawInvestment" required>
+                                <option value="">اختر الاستثمار</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">المبلغ المتاح للسحب</label>
+                            <input type="text" class="form-control" id="availableAmount" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">المبلغ المراد سحبه</label>
+                            <input type="number" class="form-control" id="withdrawAmount" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">تاريخ السحب</label>
+                            <input type="date" class="form-control" id="withdrawDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">طريقة السحب</label>
+                            <select class="form-select" id="withdrawMethod">
+                                <option value="cash">نقداً</option>
+                                <option value="check">شيك</option>
+                                <option value="transfer">حوالة بنكية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <div class="alert-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">تنبيه</div>
+                            <div class="alert-text">سيتم إلغاء الفائدة الشهرية للمبلغ المسحوب فقط.</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="withdrawNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" onclick="closeModal('withdrawModal')">إلغاء</button>
+                <button class="btn btn-warning" onclick="saveWithdrawal()">تأكيد السحب</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pay Profit Modal -->
+    <div class="modal-overlay" id="payProfitModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">دفع أرباح</h2>
+                <div class="modal-close" onclick="closeModal('payProfitModal')">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="payProfitForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">المستثمر</label>
+                            <select class="form-select" id="profitInvestor" required>
+                                <option value="">اختر المستثمر</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الفترة</label>
+                            <select class="form-select" id="profitPeriod" required>
+                                <option value="current">الشهر الحالي</option>
+                                <option value="previous">الشهر السابق</option>
+                                <option value="custom">فترة مخصصة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" id="customProfitPeriod" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">من تاريخ</label>
+                            <input type="date" class="form-control" id="profitFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">إلى تاريخ</label>
+                            <input type="date" class="form-control" id="profitToDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">إجمالي الأرباح المستحقة</label>
+                            <input type="text" class="form-control" id="dueProfit" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">المبلغ المراد دفعه</label>
+                            <input type="number" class="form-control" id="profitAmount" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">تاريخ الدفع</label>
+                            <input type="date" class="form-control" id="profitDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">طريقة الدفع</label>
+                            <select class="form-select" id="profitMethod">
+                                <option value="cash">نقداً</option>
+                                <option value="check">شيك</option>
+                                <option value="transfer">حوالة بنكية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="profitNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" onclick="closeModal('payProfitModal')">إلغاء</button>
+                <button class="btn btn-primary" onclick="savePayProfit()">تأكيد الدفع</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Investor Modal -->
+    <div class="modal-overlay" id="viewInvestorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">معلومات المستثمر</h2>
+                <div class="modal-close" onclick="closeModal('viewInvestorModal')">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <div class="modal-tab active" onclick="switchModalTab('investorDetails', 'viewInvestorModal')">
+                        المعلومات الشخصية</div>
+                    <div class="modal-tab" onclick="switchModalTab('investorInvestments', 'viewInvestorModal')">
+                        الاستثمارات</div>
+                    <div class="modal-tab" onclick="switchModalTab('investorOperations', 'viewInvestorModal')">العمليات
+                    </div>
+                    <div class="modal-tab" onclick="switchModalTab('investorProfits', 'viewInvestorModal')">الأرباح
+                    </div>
+                    <div class="modal-tab" onclick="switchModalTab('investorDocuments', 'viewInvestorModal')">المستندات
+                    </div>
+                </div>
+                <div class="modal-tab-content active" id="investorDetails">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="modal-tab-content" id="investorInvestments">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="modal-tab-content" id="investorOperations">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="modal-tab-content" id="investorProfits">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="modal-tab-content" id="investorDocuments">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" onclick="closeModal('viewInvestorModal')">إغلاق</button>
+                <button class="btn btn-warning" onclick="editInvestor(currentInvestorId)">تعديل</button>
+                <button class="btn btn-primary" onclick="openNewInvestmentModal(currentInvestorId)">استثمار
+                    جديد</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteConfirmationModal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 class="modal-title">تأكيد الحذف</h2>
+                <div class="modal-close" onclick="closeModal('deleteConfirmationModal')">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">تحذير</div>
+                        <div class="alert-text" id="deleteConfirmationMessage">
+                            هل أنت متأكد من أنك تريد حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" onclick="closeModal('deleteConfirmationModal')">إلغاء</button>
+                <button class="btn btn-danger" id="confirmDeleteButton" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> تأكيد الحذف
                 </button>
             </div>
         </div>
-        <div class="console-content" id="console-content">
-            <!-- هنا ستظهر سجلات وحدة التحكم -->
-        </div>
     </div>
 
-    <!-- مودال إنشاء ملف جديد -->
-    <div class="modal" id="new-file-modal">
-        <div class="modal-content">
+    <!-- Firebase Sync Dialog -->
+    <div class="modal-overlay" id="syncDialog">
+        <div class="modal">
             <div class="modal-header">
-                <h2>إنشاء ملف جديد</h2>
-                <i class="fas fa-times close-modal"></i>
+                <h2 class="modal-title">إعدادات المزامنة</h2>
+                <div class="modal-close" onclick="closeSyncDialog()">
+                    <i class="fas fa-times"></i>
+                </div>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="new-file-name">اسم الملف:</label>
-                    <input type="text" id="new-file-name" class="form-control" placeholder="مثال: index.html">
-                </div>
-                <div class="form-group">
-                    <label for="new-file-type">نوع الملف:</label>
-                    <select id="new-file-type" class="form-control">
-                        <option value="html">HTML</option>
-                        <option value="css">CSS</option>
-                        <option value="js">JavaScript</option>
-                        <option value="json">JSON</option>
-                        <option value="txt">نص عادي</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="new-file-template">استخدام قالب:</label>
-                    <select id="new-file-template" class="form-control">
-                        <option value="empty">بدون قالب</option>
-                        <option value="basic">قالب أساسي</option>
-                        <option value="full">قالب كامل</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button cancel close-modal">إلغاء</button>
-                <button class="modal-button primary" id="create-file-btn">إنشاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- مودال إنشاء مجلد جديد -->
-    <div class="modal" id="new-folder-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>إنشاء مجلد جديد</h2>
-                <i class="fas fa-times close-modal"></i>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="new-folder-name">اسم المجلد:</label>
-                    <input type="text" id="new-folder-name" class="form-control" placeholder="مثال: مجلد جديد">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button cancel close-modal">إلغاء</button>
-                <button class="modal-button primary" id="create-folder-btn">إنشاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- مودال رفع ملف -->
-    <div class="modal" id="upload-file-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>رفع ملف</h2>
-                <i class="fas fa-times close-modal"></i>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="upload-file-input" class="file-input-label">
-                        <i class="fas fa-cloud-upload-alt"></i> اختر ملفاً أو اسحبه هنا
-                    </label>
-                    <input type="file" id="upload-file-input" multiple>
-                </div>
-                <div class="upload-destination">
-                    <label>المجلد الوجهة:</label>
-                    <div id="upload-destination-path">المجلد الرئيسي</div>
-                    <button id="change-destination">تغيير</button>
-                </div>
-                <div id="upload-file-list"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button cancel close-modal">إلغاء</button>
-                <button class="modal-button primary" id="upload-files-btn">رفع</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- مودال تصدير المشروع -->
-    <div class="modal" id="export-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>تصدير المشروع</h2>
-                <i class="fas fa-times close-modal"></i>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>اسم الملف المضغوط:</label>
-                    <input type="text" id="export-file-name" class="form-control" value="my-project.zip">
-                </div>
-                <div class="form-group">
-                    <label>خيارات التصدير:</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="export-include-all" checked>
-                        <label for="export-include-all">تضمين جميع الملفات والمجلدات</label>
+                <div id="loginForm" style="display: none;">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">تسجيل الدخول</h2>
+                            <p class="form-subtitle">قم بتسجيل الدخول لتفعيل المزامنة</p>
+                        </div>
+                        <form id="firebaseLoginForm" onsubmit="loginToFirebase(event)">
+                            <div class="form-group">
+                                <label class="form-label">البريد الإلكتروني</label>
+                                <input type="email" class="form-control" id="loginEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">كلمة المرور</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="export-minify">
-                        <label for="export-minify">تصغير ملفات CSS و JavaScript</label>
+                </div>
+
+                <div id="syncOptions" style="display: none;">
+                    <div class="form-container">
+                        <div class="form-header">
+                            <h2 class="form-title">خيارات المزامنة</h2>
+                            <p class="form-subtitle">تم تسجيل الدخول كـ <span id="loggedInUser"></span></p>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 class="form-subtitle">الحالة</h3>
+                            <div class="alert alert-info" id="syncStatusAlert">
+                                <div class="alert-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <div class="alert-title">حالة المزامنة</div>
+                                    <div class="alert-text" id="syncStatusText">
+                                        المزامنة متوقفة حالياً.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="startSyncButton" onclick="startSync()">
+                                <i class="fas fa-play"></i> بدء المزامنة
+                            </button>
+                            <button class="btn btn-danger" id="stopSyncButton" onclick="stopSync()"
+                                style="display: none;">
+                                <i class="fas fa-stop"></i> إيقاف المزامنة
+                            </button>
+
+                            <button class="btn btn-info" onclick="refreshBackupsFromFirebase()">
+                                <i class="fas fa-sync"></i> تحديث قائمة النسخ الاحتياطية
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <h3 class="form-subtitle">النسخ الاحتياطية</h3>
+                            <select class="form-select" id="backupsList" size="5" style="height: auto;">
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                            <div style="margin-top: 10px;">
+                                <button class="btn btn-primary" onclick="createFirebaseBackup()">
+                                    <i class="fas fa-plus"></i> إنشاء نسخة جديدة
+                                </button>
+                                <button class="btn btn-warning" onclick="restoreFirebaseBackup()">
+                                    <i class="fas fa-upload"></i> استعادة
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteFirebaseBackup()">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="modal-button cancel close-modal">إلغاء</button>
-                <button class="modal-button primary" id="export-project-btn">تصدير</button>
+                <button class="btn btn-light" onclick="closeSyncDialog()">إغلاق</button>
             </div>
         </div>
     </div>
 
-    <!-- مودال اختيار مجلد الوجهة -->
-    <div class="modal" id="folder-select-modal">
-        <div class="modal-content">
+    <!-- Calendar Event Modal -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal">
             <div class="modal-header">
-                <h2>اختر المجلد الوجهة</h2>
-                <i class="fas fa-times close-modal"></i>
+                <h2 class="modal-title" id="eventModalTitle">إضافة حدث جديد</h2>
+                <div class="modal-close" onclick="closeModal('eventModal')">
+                    <i class="fas fa-times"></i>
+                </div>
             </div>
             <div class="modal-body">
-                <div class="folder-tree" id="folder-tree">
-                    <!-- هنا ستظهر شجرة المجلدات -->
-                </div>
+                <form id="eventForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">العنوان</label>
+                            <input type="text" class="form-control" id="eventTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">النوع</label>
+                            <select class="form-select" id="eventType">
+                                <option value="meeting">اجتماع</option>
+                                <option value="payment">دفع أرباح</option>
+                                <option value="withdrawal">سحب</option>
+                                <option value="investment">استثمار</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" id="eventDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">الوقت</label>
+                            <input type="time" class="form-control" id="eventTime" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">المستثمر (اختياري)</label>
+                            <select class="form-select" id="eventInvestor">
+                                <option value="">اختر المستثمر</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">مدة الحدث (بالدقائق)</label>
+                            <input type="number" class="form-control" id="eventDuration" value="60" min="15" step="15">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">التذكير</label>
+                        <select class="form-select" id="eventReminder">
+                            <option value="none">لا تذكير</option>
+                            <option value="5min">قبل 5 دقائق</option>
+                            <option value="15min">قبل 15 دقيقة</option>
+                            <option value="30min">قبل 30 دقيقة</option>
+                            <option value="1hour">قبل ساعة</option>
+                            <option value="1day">قبل يوم</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="eventNotes" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" id="eventId">
+                </form>
             </div>
             <div class="modal-footer">
-                <button class="modal-button cancel close-modal">إلغاء</button>
-                <button class="modal-button primary" id="select-folder-btn">اختيار</button>
+                <button class="btn btn-light" onclick="closeModal('eventModal')">إلغاء</button>
+                <button class="btn btn-danger" id="deleteEventButton" onclick="deleteEvent()" style="display: none;">
+                    <i class="fas fa-trash"></i> حذف الحدث
+                </button>
+                <button class="btn btn-primary" id="saveEventButton" onclick="saveEvent()">
+                    <i class="fas fa-save"></i> حفظ الحدث
+                </button>
             </div>
         </div>
     </div>
+    <script src="chart-utils.js"></script>
+    <script src="app.js"></script>
+    <script src="backup-restore-enhanced.js"></script>
 
-    <!-- قائمة السياق -->
-    <div class="context-menu" id="context-menu">
-        <div class="context-menu-item" data-action="new-file">
-            <i class="fas fa-file"></i>
-            ملف جديد
-        </div>
-        <div class="context-menu-item" data-action="new-folder">
-            <i class="fas fa-folder"></i>
-            مجلد جديد
-        </div>
-        <div class="context-menu-item" data-action="rename">
-            <i class="fas fa-edit"></i>
-            إعادة تسمية
-        </div>
-        <div class="context-menu-item" data-action="duplicate">
-            <i class="fas fa-copy"></i>
-            نسخ
-        </div>
-        <div class="context-menu-item" data-action="delete">
-            <i class="fas fa-trash-alt"></i>
-            حذف
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" data-action="copy-path">
-            <i class="fas fa-clipboard"></i>
-            نسخ المسار
-        </div>
-        <div class="context-menu-item" data-action="download">
-            <i class="fas fa-download"></i>
-            تنزيل
-        </div>
-    </div>
+    <script src="settings-fix.js"></script>
+    <script src="firebase-integration.js"></script>
+    <script src="firebase-fix.js"></script>
+    <script src="fixes.js"></script> <!-- Add this line -->
 
-    <!-- قائمة سياق المحرر -->
-    <div class="editor-context-menu" id="editor-context-menu">
-        <div class="context-menu-item" data-action="cut">
-            <i class="fas fa-cut"></i>
-            قص
-        </div>
-        <div class="context-menu-item" data-action="copy">
-            <i class="fas fa-copy"></i>
-            نسخ
-        </div>
-        <div class="context-menu-item" data-action="paste">
-            <i class="fas fa-paste"></i>
-            لصق
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" data-action="select-all">
-            <i class="fas fa-check-double"></i>
-            تحديد الكل
-        </div>
-        <div class="context-menu-item" data-action="find">
-            <i class="fas fa-search"></i>
-            بحث
-        </div>
-        <div class="context-menu-separator"></div>
-        <div class="context-menu-item" data-action="format-code">
-            <i class="fas fa-align-left"></i>
-            تنسيق الكود
-        </div>
-    </div>
+    <script src="daily-profit-calculations.js"></script>
 
-    <!-- التنبيه -->
-    <div class="toast-container" id="toast-container">
-        <!-- ستضاف التنبيهات هنا -->
-    </div>
+    <script src="investor-card-system.js"></script>
+    <script src="investor-cards-firebase-fix.js"></script>
+    <script src="investor-cards-delete-fix.js"></script>
+    <script src="installment-system.js"></script>
+    <script src="installment2-system.js"></script>
+    <script src="app-enhancements.js"></script>
 
-    <!-- الميزات الجديدة: مودال البحث في المشروع -->
-    <div class="modal" id="project-search-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>البحث في المشروع</h2>
-                <i class="fas fa-times close-modal"></i>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" id="project-search-input" class="form-control" placeholder="أدخل نص البحث...">
-                </div>
-                <div class="form-group">
-                    <label>خيارات البحث:</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="search-case-sensitive">
-                        <label for="search-case-sensitive">مطابقة حالة الأحرف</label>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="search-whole-word">
-                        <label for="search-whole-word">مطابقة الكلمة كاملة</label>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="search-regexp">
-                        <label for="search-regexp">استخدام التعبيرات العادية</label>
-                    </div>
-                </div>
-                <div id="search-results-container" style="max-height: 300px; overflow-y: auto; margin-top: 10px;"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button cancel close-modal">إغلاق</button>
-                <button class="modal-button primary" id="start-search-btn">بحث</button>
-            </div>
-        </div>
-    </div>
+    <script src="employee-system.js"></script>
+    <script src="installment-system.js"></script>
 
-    <!-- حقوق الملكية -->
-    <div class="footer-copyright">
-        <span>إصدار 2.0.0 - تطوير محمد عبد الرحمن</span>
-    </div>
+    <script src="employee-system.js"></script>
+    <script src="installment-system.js"></script>
 
-    <!-- تفعيل السكريبت -->
-    <script src="script.js"></script>
+    <script src="electron-integration.js"></script>
+    <script src="electron-backup-fix.js"></script>
+
+
+
+
+
+    <link rel="stylesheet" href="notification-styles.css">
+<script src="notification-enhancements.js"></script>
+<script src="toast-enhancements.js"></script>
+<script src="notification-integration.js"></script>
+
+
+<link rel="stylesheet" href="central-notification-styles.css">
+<script src="central-notification-panel.js"></script>
+<script src="accumulated-profits.js"></script>
+<script src="notification2-integration.js"></script>
+<script src="notification-search-fixed.js"></script>
+
+
+
+
+
+
 </body>
+
 </html>
