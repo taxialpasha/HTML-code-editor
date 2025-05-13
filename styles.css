@@ -1,6 +1,6 @@
 /* ===== المتغيرات الرئيسية ===== */
 :root {
-    /* الألوان الأساسية - الوضع الفاتح */
+    /* الألوان الأساسية - الوضع الداكن */
     --primary-color: #2a2f3b;
     --secondary-color: #1e2129;
     --accent-color: #3498db;
@@ -13,12 +13,24 @@
     --error-color: #e74c3c;
     --info-color: #3498db;
     
+    /* نسخة داكنة - ألوان حيوية */
+    --folder-color: #f7d143;
+    --html-color: #e44d26;
+    --css-color: #264de4;
+    --js-color: #f7df1e;
+    --json-color: #bbb;
+    
     /* أبعاد الشاشة */
     --sidebar-width: 250px;
+    --sidebar-collapsed-width: 60px;
     --header-height: 50px;
     --console-height: 200px;
     --tab-height: 40px;
     --status-bar-height: 25px;
+    
+    /* الانتقالات */
+    --transition-speed: 0.3s;
+    --transition-timing: ease;
 }
 
 /* ===== وضع السمة الفاتحة ===== */
@@ -47,7 +59,7 @@ body {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 /* ===== الترميزات الأساسية ===== */
@@ -56,10 +68,16 @@ button, select, input {
     outline: none;
     background: none;
     color: inherit;
+    font-size: inherit;
 }
 
 button {
     cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+button:active {
+    transform: scale(0.97);
 }
 
 button:disabled {
@@ -70,10 +88,12 @@ button:disabled {
 a {
     color: var(--accent-color);
     text-decoration: none;
+    transition: color 0.2s;
 }
 
 a:hover {
     text-decoration: underline;
+    color: var(--accent-hover);
 }
 
 /* ===== الرأس ===== */
@@ -99,24 +119,32 @@ a:hover {
     display: flex;
     margin-right: auto;
     margin-left: 20px;
+    flex-wrap: wrap;
 }
 
 .header-buttons button {
     background-color: transparent;
-    padding: 5px 10px;
+    padding: 8px 12px;
     margin-left: 10px;
     border-radius: 4px;
     display: flex;
     align-items: center;
-    transition: background-color 0.2s;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
+    font-size: 0.9rem;
 }
 
 .header-buttons button:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+.header-buttons button:active {
+    transform: scale(0.97);
+}
+
 .header-buttons button i {
-    margin-left: 5px;
+    margin-left: 8px;
+    font-size: 1rem;
 }
 
 .run-button {
@@ -128,7 +156,7 @@ a:hover {
     background-color: var(--accent-hover) !important;
 }
 
-.save-button, .upload-button, .export-button, .format-button {
+.save-button, .upload-button, .export-button, .format-button, .search-project-btn, .restore-backup-btn {
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
@@ -145,9 +173,22 @@ a:hover {
     background-color: var(--primary-color);
     overflow-y: auto;
     border-left: 1px solid var(--border-color);
-    transition: width 0.3s;
+    transition: width var(--transition-speed);
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+.sidebar-collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-collapsed .sidebar-title,
+.sidebar-collapsed .file-name,
+.sidebar-collapsed .folder-name,
+.sidebar-collapsed .snippets-section,
+.sidebar-collapsed .project-stats {
+    display: none;
 }
 
 .sidebar-header {
@@ -172,10 +213,17 @@ a:hover {
     cursor: pointer;
     opacity: 0.7;
     transition: opacity 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
 }
 
 .sidebar-controls div:hover {
     opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .file-browser {
@@ -192,6 +240,7 @@ a:hover {
     display: flex;
     align-items: center;
     transition: background-color 0.2s;
+    position: relative;
 }
 
 .folder:hover, .file:hover {
@@ -206,41 +255,62 @@ a:hover {
     margin-left: 10px;
     width: 20px;
     text-align: center;
+    transition: transform 0.2s; 
 }
 
 .folder i {
-    color: #f7d143;
+    color: var(--folder-color);
 }
 
 .html-file i {
-    color: #e44d26;
+    color: var(--html-color);
 }
 
 .css-file i {
-    color: #264de4;
+    color: var(--css-color);
 }
 
 .js-file i {
-    color: #f7df1e;
+    color: var(--js-color);
 }
 
 .json-file i {
-    color: #bbb;
+    color: var(--json-color);
 }
 
 .folder-content {
     padding-right: 20px;
     display: none;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .folder.open > .folder-content {
     display: block;
 }
 
+.folder-toggle {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.folder.open .folder-toggle i {
+    transform: rotate(90deg);
+}
+
 /* ===== قسم القوالب ===== */
 .snippets-section {
     border-top: 1px solid var(--border-color);
     padding: 10px 0;
+    margin-top: auto;
 }
 
 .sidebar-section-header {
@@ -277,10 +347,15 @@ a:hover {
     display: flex;
     align-items: center;
     font-size: 0.85rem;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
 .snippet-item:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+.snippet-item:active {
+    transform: scale(0.98);
 }
 
 .snippet-item i {
@@ -325,6 +400,11 @@ a:hover {
     height: var(--tab-height);
     overflow-x: auto;
     border-bottom: 1px solid var(--border-color);
+    scrollbar-width: thin;
+}
+
+.tabs::-webkit-scrollbar {
+    height: 5px;
 }
 
 .tab {
@@ -338,11 +418,16 @@ a:hover {
     align-items: center;
     min-width: 100px;
     position: relative;
+    transition: background-color 0.2s;
 }
 
 .tab.active {
     background-color: var(--secondary-color);
     border-bottom: 2px solid var(--accent-color);
+}
+
+.tab:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .tab i {
@@ -352,11 +437,21 @@ a:hover {
 .tab .close-btn {
     margin-right: 8px;
     opacity: 0.5;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, background-color 0.2s;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .tab:hover .close-btn {
     opacity: 1;
+}
+
+.tab .close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .tab .file-type {
@@ -365,6 +460,8 @@ a:hover {
 
 .tab .dirty-indicator {
     color: var(--accent-color);
+    margin-right: 4px;
+    font-weight: bold;
 }
 
 /* ===== شريط البحث ===== */
@@ -374,6 +471,12 @@ a:hover {
     border-bottom: 1px solid var(--border-color);
     display: none;
     align-items: center;
+    animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
 }
 
 .search-input-container {
@@ -390,16 +493,31 @@ a:hover {
     color: var(--text-color);
     border-radius: 3px;
     margin-left: 8px;
+    transition: border-color 0.2s;
+}
+
+.search-input-container input:focus {
+    border-color: var(--accent-color);
+}
+
+.search-buttons {
+    display: flex;
 }
 
 .search-buttons button {
     background-color: transparent;
-    padding: 3px 8px;
+    padding: 5px 10px;
     border-radius: 3px;
+    transition: background-color 0.2s;
+    margin-right: 4px;
 }
 
 .search-buttons button:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+.search-buttons button:active {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ===== حاوية المحرر ===== */
@@ -407,6 +525,7 @@ a:hover {
     flex: 1;
     position: relative;
     overflow: hidden;
+    transition: all 0.3s;
 }
 
 .no-file-opened {
@@ -418,12 +537,14 @@ a:hover {
     color: var(--text-secondary);
     padding: 20px;
     text-align: center;
+    animation: fadeIn 0.5s;
 }
 
 .no-file-opened i {
     font-size: 4rem;
     margin-bottom: 20px;
     opacity: 0.5;
+    color: var(--accent-color);
 }
 
 .no-file-opened h2 {
@@ -431,35 +552,47 @@ a:hover {
 }
 
 .no-file-opened p {
-    max-width: 500px;
-    line-height: 1.5;
+    max-width: 600px;
+    line-height: 1.6;
     margin-bottom: 20px;
+    font-size: 1.1rem;
 }
 
 .quick-actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: 20px;
+    max-width: 800px;
 }
 
 .quick-action-btn {
-    padding: 12px 20px;
+    padding: 14px 20px;
     background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 5px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    border: 1px solid var(--border-color);
+    min-width: 180px;
+    justify-content: center;
 }
 
 .quick-action-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.quick-action-btn:active {
+    transform: translateY(0);
 }
 
 .quick-action-btn i {
     margin-left: 10px;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    color: var(--accent-color);
 }
 
 #editor {
@@ -469,6 +602,7 @@ a:hover {
     bottom: 0;
     left: 0;
     font-size: 14px;
+    direction: ltr; /* للتوافق مع محرر الأكواد */
 }
 
 .editor-overlay {
@@ -487,12 +621,13 @@ a:hover {
     left: 10px;
     background-color: rgba(39, 174, 96, 0.8);
     color: white;
-    padding: 5px 10px;
-    border-radius: 3px;
+    padding: 8px 12px;
+    border-radius: 4px;
     transition: opacity 0.3s, transform 0.3s;
     opacity: 0;
     transform: translateY(-10px);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .autosave-notification.show {
@@ -515,15 +650,45 @@ a:hover {
     display: none;
     z-index: 5;
     border-left: 1px solid var(--border-color);
+    transition: all 0.3s;
 }
 
 .editor-split .live-preview {
     display: block;
+    animation: fadeIn 0.3s;
 }
 
 .editor-split #editor {
     right: 0;
     left: 50%;
+    transition: left 0.3s;
+}
+
+/* زر تبديل المعاينة المباشرة */
+.live-preview-toggle {
+    background-color: var(--accent-color);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 15px;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.live-preview-toggle:hover {
+    background-color: var(--accent-hover);
+}
+
+.live-preview-toggle:active {
+    transform: scale(0.95);
 }
 
 /* ===== حاوية المعاينة ===== */
@@ -533,6 +698,7 @@ a:hover {
     overflow: hidden;
     position: relative;
     background-color: #fff;
+    animation: fadeIn 0.3s;
 }
 
 .preview-container iframe {
@@ -543,13 +709,15 @@ a:hover {
 
 .preview-controls {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 15px;
     display: flex;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 5px;
-    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 8px;
+    border-radius: 8px;
     z-index: 20;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
 }
 
 .preview-controls button, 
@@ -557,19 +725,100 @@ a:hover {
     background-color: transparent;
     color: white;
     border: none;
-    padding: 5px 8px;
+    padding: 8px 10px;
     margin-left: 5px;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
 .preview-controls button:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+.preview-controls button:active {
+    transform: scale(0.95);
+}
+
 .preview-controls select {
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 5px 10px;
+    padding: 8px 12px;
+    outline: none;
+}
+
+.preview-controls select:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== أنماط الأجهزة المختلفة للمعاينة ===== */
+.device-desktop,
+.device-laptop,
+.device-tablet,
+.device-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 20px;
+    overflow: auto;
+}
+
+.device-desktop iframe {
+    width: 1920px;
+    height: 1080px;
+    transform: scale(0.5);
+    transform-origin: center;
+    border: 20px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+.device-laptop iframe {
+    width: 1366px;
+    height: 768px;
+    transform: scale(0.6);
+    transform-origin: center;
+    border: 20px solid #333;
+    border-top-width: 30px;
+    border-bottom-width: 50px;
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s;
+}
+
+.device-tablet iframe {
+    width: 768px;
+    height: 1024px;
+    border: 40px solid #333;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s;
+}
+
+.device-mobile iframe {
+    width: 375px;
+    height: 667px;
+    border: 20px solid #333;
+    border-top-width: 60px;
+    border-bottom-width: 60px;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.device-mobile::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 10px;
+    background-color: #222;
+    border-radius: 5px;
+    z-index: 100;
 }
 
 /* ===== شريط الحالة ===== */
@@ -591,16 +840,45 @@ a:hover {
 .editor-controls {
     margin-right: auto;
     display: flex;
+    align-items: center;
 }
 
 .editor-controls select {
     background-color: rgba(255, 255, 255, 0.1);
     border: none;
     color: var(--text-color);
-    padding: 1px 5px;
+    padding: 2px 8px;
     border-radius: 3px;
     margin-right: 10px;
     font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.editor-controls select:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== أزرار التكبير والتصغير ===== */
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.zoom-controls button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    margin-right: 5px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s;
+}
+
+.zoom-controls button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ===== وحدة التحكم ===== */
@@ -615,6 +893,13 @@ a:hover {
     display: none;
     flex-direction: column;
     z-index: 1000;
+    animation: slideUp 0.3s;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
 }
 
 .console-header {
@@ -636,14 +921,16 @@ a:hover {
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 12px;
     color: #ccc;
+    direction: ltr; /* للتوافق مع وحدة التحكم */
 }
 
 .console-log {
     margin: 2px 0;
     line-height: 1.4;
-    padding: 2px 0;
+    padding: 4px 6px;
     border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
     position: relative;
+    border-radius: 3px;
 }
 
 .console-log.error {
@@ -661,14 +948,21 @@ a:hover {
     background-color: rgba(52, 152, 219, 0.1);
 }
 
+.console-timestamp {
+    color: rgba(255, 255, 255, 0.5);
+    margin-left: 6px;
+    font-size: 0.85em;
+}
+
 .console-buttons button {
     background: none;
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 3px;
     margin-right: 5px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .console-buttons button:hover {
@@ -685,20 +979,34 @@ a:hover {
     background-color: var(--success-color);
     color: white;
     padding: 4px 10px;
-    border-radius: 3px;
+    border-radius: 6px;
     font-size: 0.8rem;
     margin-left: 15px;
     display: flex;
     align-items: center;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
 }
 
 .server-status i {
-    margin-left: 5px;
+    margin-left: 6px;
     font-size: 0.7rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
 }
 
 .server-status.offline {
     background-color: var(--error-color);
+}
+
+.server-status.offline i {
+    animation: none;
 }
 
 /* ===== النوافذ المنبثقة ===== */
@@ -713,14 +1021,32 @@ a:hover {
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.2s;
+    backdrop-filter: blur(3px);
 }
 
 .modal-content {
     background-color: var(--primary-color);
-    width: 400px;
-    border-radius: 5px;
+    width: 450px;
+    max-width: 95%;
+    max-height: 90vh;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    animation: modalSlideIn 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes modalSlideIn {
+    from { 
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
@@ -729,6 +1055,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .modal-header h2 {
@@ -738,14 +1065,23 @@ a:hover {
 .modal-header i {
     cursor: pointer;
     opacity: 0.7;
+    transition: opacity 0.2s;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .modal-header i:hover {
     opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .modal-body {
     padding: 20px;
+    overflow-y: auto;
 }
 
 .modal-footer {
@@ -753,15 +1089,17 @@ a:hover {
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: flex-end;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .modal-button {
     padding: 8px 20px;
     margin-right: 10px;
     border: none;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
 .modal-button.primary {
@@ -783,23 +1121,33 @@ a:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
+.modal-button:active {
+    transform: scale(0.97);
+}
+
 .form-group {
     margin-bottom: 15px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-size: 0.9rem;
 }
 
 .form-control {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     background-color: var(--secondary-color);
     border: 1px solid var(--border-color);
     color: var(--text-color);
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
 .form-group input[type="file"] {
@@ -808,53 +1156,75 @@ a:hover {
 
 .form-group .file-input-label {
     display: block;
-    padding: 10px;
+    padding: 15px;
     background-color: var(--secondary-color);
-    border: 1px solid var(--border-color);
+    border: 2px dashed var(--border-color);
     color: var(--text-color);
-    border-radius: 3px;
+    border-radius: 6px;
     cursor: pointer;
     text-align: center;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
 .form-group .file-input-label:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-color);
+}
+
+.form-group .file-input-label i {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+
+.drag-over {
+    background-color: rgba(52, 152, 219, 0.1) !important;
+    border-color: var(--accent-color) !important;
 }
 
 .checkbox-group {
     display: flex;
     align-items: center;
-    margin: 5px 0;
+    margin: 8px 0;
 }
 
 .checkbox-group input[type="checkbox"] {
     margin-left: 10px;
+    width: 16px;
+    height: 16px;
 }
 
 .upload-destination {
     margin: 15px 0;
-    padding: 10px;
+    padding: 12px;
     background-color: var(--secondary-color);
-    border-radius: 3px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
 }
 
 .upload-destination label {
     display: block;
     margin-bottom: 5px;
     font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 #upload-destination-path {
     margin: 5px 0;
     font-weight: bold;
+    padding: 5px 0;
 }
 
 #change-destination {
     background-color: rgba(255, 255, 255, 0.1);
     padding: 5px 10px;
-    border-radius: 3px;
+    border-radius: 4px;
     margin-top: 5px;
+    transition: background-color 0.2s;
+}
+
+#change-destination:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 #upload-file-list {
@@ -864,7 +1234,7 @@ a:hover {
 }
 
 #upload-file-list > div {
-    padding: 5px;
+    padding: 8px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -881,13 +1251,21 @@ a:hover {
 .folder-tree {
     max-height: 300px;
     overflow-y: auto;
+    margin: 10px 0;
+    padding: 5px;
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
 }
 
 .folder-tree-item {
-    padding: 5px 8px;
+    padding: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    margin: 2px 0;
 }
 
 .folder-tree-item:hover {
@@ -902,11 +1280,12 @@ a:hover {
     margin-left: 8px;
     width: 20px;
     text-align: center;
-    color: #f7d143;
+    color: var(--folder-color);
 }
 
 .folder-tree-item .indent {
     width: 20px;
+    height: 1px;
 }
 
 /* ===== قوائم السياق ===== */
@@ -914,12 +1293,13 @@ a:hover {
     position: absolute;
     background-color: var(--primary-color);
     border: 1px solid var(--border-color);
-    border-radius: 3px;
+    border-radius: 6px;
     padding: 5px 0;
-    min-width: 150px;
+    min-width: 180px;
     z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     display: none;
+    animation: fadeIn 0.2s;
 }
 
 .context-menu-item {
@@ -928,6 +1308,7 @@ a:hover {
     display: flex;
     align-items: center;
     font-size: 0.9rem;
+    transition: background-color 0.2s;
 }
 
 .context-menu-item:hover {
@@ -938,6 +1319,7 @@ a:hover {
     width: 20px;
     margin-left: 10px;
     text-align: center;
+    color: var(--text-secondary);
 }
 
 .context-menu-separator {
@@ -946,24 +1328,81 @@ a:hover {
     margin: 5px 0;
 }
 
+/* ===== البحث في المشروع ===== */
+.search-project-btn {
+    background-color: rgba(52, 152, 219, 0.2) !important;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.search-project-btn:hover {
+    background-color: rgba(52, 152, 219, 0.3) !important;
+}
+
+.search-results-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-result-item {
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.result-path {
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-bottom: 3px;
+    color: var(--accent-color);
+}
+
+.result-text {
+    font-family: 'Consolas', 'Monaco', monospace;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
 /* ===== التنبيهات ===== */
 .toast-container {
     position: fixed;
-    bottom: 20px;
+    bottom: 30px;
     left: 20px;
     z-index: 2000;
+    max-width: 350px;
 }
 
 .toast {
-    padding: 10px 15px;
-    margin: 5px 0;
-    border-radius: 3px;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border-radius: 6px;
     background-color: var(--primary-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     animation: toastIn 0.3s forwards;
-    max-width: 350px;
+    border-right: 4px solid var(--accent-color);
 }
 
 .toast.closing {
@@ -975,16 +1414,32 @@ a:hover {
     font-size: 1.2rem;
 }
 
+.toast.success {
+    border-right-color: var(--success-color);
+}
+
 .toast.success i {
     color: var(--success-color);
+}
+
+.toast.error {
+    border-right-color: var(--error-color);
 }
 
 .toast.error i {
     color: var(--error-color);
 }
 
+.toast.warning {
+    border-right-color: var(--warning-color);
+}
+
 .toast.warning i {
     color: var(--warning-color);
+}
+
+.toast.info {
+    border-right-color: var(--info-color);
 }
 
 .toast.info i {
@@ -997,7 +1452,7 @@ a:hover {
 
 .toast-title {
     font-weight: bold;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 .toast-message {
@@ -1009,10 +1464,18 @@ a:hover {
     cursor: pointer;
     opacity: 0.7;
     padding: 5px;
+    transition: opacity 0.2s, background-color 0.2s;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toast-close:hover {
     opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 @keyframes toastIn {
@@ -1037,6 +1500,29 @@ a:hover {
     }
 }
 
+/* ===== زر استعادة النسخة الاحتياطية ===== */
+.restore-backup-btn {
+    background-color: rgba(243, 156, 18, 0.2) !important;
+}
+
+.restore-backup-btn:hover {
+    background-color: rgba(243, 156, 18, 0.3) !important;
+}
+
+/* ===== حقوق الملكية ===== */
+.footer-copyright {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 100;
+    text-align: center;
+}
+
 /* ===== أشرطة التمرير ===== */
 ::-webkit-scrollbar {
     width: 8px;
@@ -1057,15 +1543,28 @@ a:hover {
 }
 
 /* ===== الاستجابة للشاشات المختلفة ===== */
+@media (max-width: 992px) {
+    .header h1 {
+        font-size: 1rem;
+    }
+    
+    .header-buttons button {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
         position: absolute;
         z-index: 50;
         height: calc(100% - var(--header-height));
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
     }
 
     .sidebar-collapsed {
         width: 0;
+        border: none;
     }
 
     .header-buttons {
@@ -1082,87 +1581,33 @@ a:hover {
 
     .preview-controls {
         flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .modal-content {
+        width: 95%;
     }
 }
 
-/* ===== أنماط خاصة بوضع الجهاز ===== */
-.preview-container.device-desktop {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0;
-}
-
-.preview-container.device-desktop iframe {
-    width: 1920px;
-    height: 1080px;
-    border: 15px solid #333;
-    border-radius: 5px;
-    transform: scale(0.5);
-    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-}
-
-.preview-container.device-laptop {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0;
-}
-
-.preview-container.device-laptop iframe {
-    width: 1366px;
-    height: 768px;
-    border: 15px solid #333;
-    border-top-width: 25px;
-    border-bottom-width: 25px;
-    border-radius: 5px;
-    transform: scale(0.6);
-    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-}
-
-.preview-container.device-tablet {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0;
-}
-
-.preview-container.device-tablet iframe {
-    width: 768px;
-    height: 1024px;
-    border: 30px solid #333;
-    border-radius: 20px;
-    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-}
-
-.preview-container.device-mobile {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0;
-}
-
-.preview-container.device-mobile iframe {
-    width: 375px;
-    height: 667px;
-    border: 15px solid #333;
-    border-top-width: 50px;
-    border-bottom-width: 50px;
-    border-radius: 30px;
-    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.preview-container.device-mobile iframe::before {
-    content: '';
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 10px;
-    background-color: #222;
-    border-radius: 5px;
+@media (max-width: 576px) {
+    .header h1 {
+        display: none;
+    }
+    
+    .header-buttons button {
+        padding: 6px;
+        margin-left: 5px;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .toast-container {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
 }
 
 /* وضع داكن لمحرر الأكواد */
@@ -1173,11 +1618,23 @@ a:hover {
     --dark-editor: true;
 }
 
-/* التبديل بين الأوضاع */
-body.light-theme .theme-toggle i {
-    content: "\f186"; /* أيقونة القمر */
+/* تحسينات أخرى */
+.fa-file-plus:before {
+    content: "\f477"; /* استخدام الأيقونة الصحيحة */
 }
 
-body:not(.light-theme) .theme-toggle i {
-    content: "\f185"; /* أيقونة الشمس */
+.fa-folder-plus:before {
+    content: "\f65e"; /* استخدام الأيقونة الصحيحة */
+}
+
+/* تحسينات للتوافق مع المتصفحات المختلفة */
+@supports (-webkit-overflow-scrolling: touch) {
+    /* تحسينات لأجهزة الآيفون والآيباد */
+    .form-control, button {
+        font-size: 16px; /* منع تكبير الشاشة عند النقر على الحقول */
+    }
+    
+    .status-bar {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }
