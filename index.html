@@ -6,503 +6,254 @@
     <title>محرر الأكواد والخادم المحلي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
-    <style>
-        :root {
-            --primary-color: #2a2f3b;
-            --secondary-color: #1e2129;
-            --accent-color: #3498db;
-            --text-color: #f5f5f5;
-            --sidebar-width: 250px;
-            --header-height: 50px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .header {
-            background-color: var(--primary-color);
-            height: var(--header-height);
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 100;
-        }
-
-        .header h1 {
-            font-size: 1.2rem;
-            margin-right: 20px;
-        }
-
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--primary-color);
-            overflow-y: auto;
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            transition: width 0.3s;
-        }
-
-        .sidebar-header {
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-title {
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .file-browser {
-            padding: 10px;
-        }
-
-        .folder, .file {
-            padding: 5px 8px;
-            margin: 2px 0;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            transition: background-color 0.2s;
-        }
-
-        .folder:hover, .file:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .folder i, .file i {
-            margin-left: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .folder i {
-            color: #f7d143;
-        }
-
-        .html-file i {
-            color: #e44d26;
-        }
-
-        .css-file i {
-            color: #264de4;
-        }
-
-        .js-file i {
-            color: #f7df1e;
-        }
-
-        .folder-content {
-            padding-right: 20px;
-            display: none;
-        }
-
-        .folder.open > .folder-content {
-            display: block;
-        }
-
-        .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .tabs {
-            display: flex;
-            background-color: var(--primary-color);
-            height: 40px;
-            overflow-x: auto;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .tab {
-            padding: 0 15px;
-            line-height: 40px;
-            background-color: var(--primary-color);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-        }
-
-        .tab.active {
-            background-color: var(--secondary-color);
-            border-bottom: 2px solid var(--accent-color);
-        }
-
-        .tab i {
-            margin-left: 8px;
-        }
-
-        .tab .close-btn {
-            margin-right: 8px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
-
-        .tab:hover .close-btn {
-            opacity: 1;
-        }
-
-        .tab .file-type {
-            margin-right: 8px;
-        }
-
-        .editor-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #editor {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            font-size: 14px;
-        }
-
-        .preview-container {
-            flex: 1;
-            display: none;
-            overflow: hidden;
-        }
-
-        .preview-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .status-bar {
-            height: 25px;
-            background-color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .status-bar .language {
-            margin-left: 15px;
-        }
-
-        .toggle-sidebar {
-            cursor: pointer;
-            padding: 5px;
-            margin-left: 10px;
-            border-radius: 3px;
-        }
-
-        .toggle-sidebar:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-collapsed {
-            width: 0;
-        }
-
-        .run-button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .run-button i {
-            margin-left: 5px;
-        }
-
-        .run-button:hover {
-            background-color: #2980b9;
-        }
-
-        .upload-button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .upload-button i {
-            margin-left: 5px;
-        }
-
-        .upload-button:hover {
-            background-color: #2ecc71;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: var(--primary-color);
-            width: 400px;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            font-size: 1.2rem;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            padding: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .modal-button {
-            padding: 8px 15px;
-            margin-right: 10px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .modal-button.primary {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .modal-button.cancel {
-            background-color: transparent;
-            color: var(--text-color);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 8px;
-            background-color: var(--secondary-color);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-color);
-            border-radius: 3px;
-        }
-
-        .form-group input[type="file"] {
-            display: none;
-        }
-
-        .form-group .file-input-label {
-            display: block;
-            padding: 8px;
-            background-color: var(--secondary-color);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-color);
-            border-radius: 3px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .context-menu {
-            position: absolute;
-            background-color: var(--primary-color);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            padding: 5px 0;
-            min-width: 150px;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            display: none;
-        }
-
-        .context-menu-item {
-            padding: 8px 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-
-        .context-menu-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .context-menu-item i {
-            width: 20px;
-            margin-left: 10px;
-        }
-
-        /* شريط التمرير مخصص */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--secondary-color);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* للأجهزة المحمولة */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                z-index: 50;
-                height: calc(100% - var(--header-height));
-            }
-
-            .sidebar-collapsed {
-                width: 0;
-            }
-        }
-
-        /* لوحة المعلومات للملفات المفتوحة */
-        .no-file-opened {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: rgba(255, 255, 255, 0.5);
-            padding: 20px;
-            text-align: center;
-        }
-
-        .no-file-opened i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-
-        .no-file-opened h2 {
-            margin-bottom: 10px;
-        }
-
-        .no-file-opened p {
-            max-width: 500px;
-            line-height: 1.5;
-        }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-beautify.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- شريط الأدوات العلوي -->
     <div class="header">
         <div class="toggle-sidebar">
             <i class="fas fa-bars"></i>
         </div>
         <h1>محرر الأكواد والخادم المحلي</h1>
-        <button class="run-button">
-            <i class="fas fa-play"></i>
-            تشغيل
-        </button>
-        <button class="upload-button">
-            <i class="fas fa-upload"></i>
-            رفع ملفات
-        </button>
+
+        <div class="server-status" id="server-status">
+            <i class="fas fa-circle"></i>
+            الخادم: غير نشط
+        </div>
+
+        <div class="header-buttons">
+            <button class="run-button" id="run-button">
+                <i class="fas fa-play"></i>
+                تشغيل
+            </button>
+            <button class="save-button" id="save-button">
+                <i class="fas fa-save"></i>
+                حفظ
+            </button>
+            <button class="format-button" id="format-button">
+                <i class="fas fa-align-left"></i>
+                تنسيق
+            </button>
+            <button class="upload-button">
+                <i class="fas fa-upload"></i>
+                رفع ملفات
+            </button>
+            <button class="export-button" id="export-button">
+                <i class="fas fa-file-export"></i>
+                تصدير المشروع
+            </button>
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+                وضع مظلم
+            </button>
+        </div>
     </div>
 
+    <!-- الحاوية الرئيسية -->
     <div class="main-container">
+        <!-- القائمة الجانبية -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">مستكشف الملفات</div>
-                <div class="new-file-btn" title="ملف جديد">
-                    <i class="fas fa-plus"></i>
+                <div class="sidebar-controls">
+                    <div class="new-file-btn" title="ملف جديد">
+                        <i class="fas fa-file-plus"></i>
+                    </div>
+                    <div class="new-folder-btn" title="مجلد جديد">
+                        <i class="fas fa-folder-plus"></i>
+                    </div>
+                    <div class="refresh-btn" title="تحديث">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
                 </div>
             </div>
             <div class="file-browser" id="file-browser">
                 <!-- هنا ستظهر الملفات والمجلدات -->
             </div>
+            
+            <!-- قسم المفضلة والقوالب -->
+            <div class="snippets-section">
+                <div class="sidebar-section-header">
+                    <div class="section-title">قوالب جاهزة</div>
+                    <div class="section-toggle">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="snippets-list">
+                    <div class="snippet-item" data-snippet="html-template">
+                        <i class="fab fa-html5"></i> قالب HTML
+                    </div>
+                    <div class="snippet-item" data-snippet="css-reset">
+                        <i class="fab fa-css3-alt"></i> CSS Reset
+                    </div>
+                    <div class="snippet-item" data-snippet="responsive-layout">
+                        <i class="fas fa-mobile-alt"></i> تخطيط متجاوب
+                    </div>
+                    <div class="snippet-item" data-snippet="flex-grid">
+                        <i class="fas fa-th"></i> شبكة Flex
+                    </div>
+                    <div class="snippet-item" data-snippet="js-dom">
+                        <i class="fab fa-js"></i> DOM تفاعلي
+                    </div>
+                </div>
+            </div>
+            
+            <!-- إحصاءات المشروع -->
+            <div class="project-stats" id="project-stats">
+                <div class="stats-header">إحصاءات المشروع</div>
+                <div class="stats-content">
+                    <div class="stat-item">
+                        <div class="stat-label">عدد الملفات:</div>
+                        <div class="stat-value" id="files-count">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">عدد المجلدات:</div>
+                        <div class="stat-value" id="folders-count">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">حجم المشروع:</div>
+                        <div class="stat-value" id="project-size">0 KB</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- منطقة المحتوى -->
         <div class="content-area">
+            <!-- شريط التبويبات -->
             <div class="tabs" id="tabs">
                 <!-- الألسنة ستضاف هنا باستخدام جافا سكريبت -->
             </div>
 
+            <!-- شريط البحث -->
+            <div class="search-bar" id="search-bar">
+                <div class="search-input-container">
+                    <input type="text" id="search-input" placeholder="بحث...">
+                    <input type="text" id="replace-input" placeholder="استبدال بـ...">
+                </div>
+                <div class="search-buttons">
+                    <button id="search-prev" title="السابق">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button id="search-next" title="التالي">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button id="replace-btn" title="استبدال">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                    <button id="replace-all-btn" title="استبدال الكل">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="close-search" title="إغلاق">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- حاوية المحرر -->
             <div class="editor-container" id="editor-container">
                 <div class="no-file-opened">
                     <i class="fas fa-code"></i>
                     <h2>مرحباً بك في محرر الأكواد والخادم المحلي</h2>
                     <p>قم بإنشاء ملف جديد أو افتح ملفاً موجوداً من شريط المستكشف الجانبي للبدء. يمكنك أيضاً رفع ملفات من جهازك باستخدام زر "رفع ملفات".</p>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" data-action="new-html">
+                            <i class="fab fa-html5"></i>
+                            ملف HTML جديد
+                        </button>
+                        <button class="quick-action-btn" data-action="new-css">
+                            <i class="fab fa-css3-alt"></i>
+                            ملف CSS جديد
+                        </button>
+                        <button class="quick-action-btn" data-action="new-js">
+                            <i class="fab fa-js"></i>
+                            ملف JavaScript جديد
+                        </button>
+                        <button class="quick-action-btn" data-action="upload">
+                            <i class="fas fa-upload"></i>
+                            رفع ملفات
+                        </button>
+                    </div>
                 </div>
                 <div id="editor" style="display: none;"></div>
+                <div class="editor-overlay" id="editor-overlay">
+                    <div class="autosave-notification">
+                        <i class="fas fa-save"></i> تم الحفظ تلقائياً
+                    </div>
+                </div>
+                <div id="live-preview" class="live-preview"></div>
             </div>
 
+            <!-- حاوية المعاينة -->
             <div class="preview-container" id="preview-container">
                 <iframe id="preview-iframe"></iframe>
+                <div class="preview-controls">
+                    <button id="preview-refresh" title="تحديث">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="preview-back" title="العودة للمحرر">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button id="preview-console" title="إظهار وحدة التحكم">
+                        <i class="fas fa-terminal"></i>
+                    </button>
+                    <select id="preview-device">
+                        <option value="responsive">تفاعلي</option>
+                        <option value="desktop">سطح المكتب (1920×1080)</option>
+                        <option value="laptop">حاسوب محمول (1366×768)</option>
+                        <option value="tablet">جهاز لوحي (768×1024)</option>
+                        <option value="mobile">هاتف ذكي (375×667)</option>
+                    </select>
+                </div>
             </div>
 
+            <!-- شريط الحالة -->
             <div class="status-bar">
                 <span id="cursor-position">السطر: 1، العمود: 1</span>
                 <span class="language" id="language-indicator">لغة: لم يتم تحديدها</span>
+                <span class="encoding">UTF-8</span>
+                <span class="autosave-status" id="autosave-status">حفظ تلقائي: مفعل</span>
+                <div class="editor-controls">
+                    <select id="editor-theme" title="سمة المحرر">
+                        <option value="monokai">Monokai</option>
+                        <option value="github">GitHub</option>
+                        <option value="tomorrow_night">Tomorrow Night</option>
+                        <option value="solarized_dark">Solarized Dark</option>
+                        <option value="solarized_light">Solarized Light</option>
+                        <option value="twilight">Twilight</option>
+                        <option value="terminal">Terminal</option>
+                    </select>
+                    <select id="editor-font-size" title="حجم الخط">
+                        <option value="12px">12px</option>
+                        <option value="14px" selected>14px</option>
+                        <option value="16px">16px</option>
+                        <option value="18px">18px</option>
+                        <option value="20px">20px</option>
+                    </select>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- وحدة التحكم للتطبيق -->
+    <div class="console-container" id="console-container">
+        <div class="console-header">
+            <h3>وحدة التحكم</h3>
+            <div class="console-buttons">
+                <button class="console-button console-clear" id="console-clear">
+                    <i class="fas fa-trash"></i> مسح
+                </button>
+                <button class="console-button console-close" id="console-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="console-content" id="console-content">
+            <!-- هنا ستظهر سجلات وحدة التحكم -->
         </div>
     </div>
 
@@ -524,7 +275,16 @@
                         <option value="html">HTML</option>
                         <option value="css">CSS</option>
                         <option value="js">JavaScript</option>
+                        <option value="json">JSON</option>
                         <option value="txt">نص عادي</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-file-template">استخدام قالب:</label>
+                    <select id="new-file-template" class="form-control">
+                        <option value="empty">بدون قالب</option>
+                        <option value="basic">قالب أساسي</option>
+                        <option value="full">قالب كامل</option>
                     </select>
                 </div>
             </div>
@@ -569,11 +329,66 @@
                     </label>
                     <input type="file" id="upload-file-input" multiple>
                 </div>
+                <div class="upload-destination">
+                    <label>المجلد الوجهة:</label>
+                    <div id="upload-destination-path">المجلد الرئيسي</div>
+                    <button id="change-destination">تغيير</button>
+                </div>
                 <div id="upload-file-list"></div>
             </div>
             <div class="modal-footer">
                 <button class="modal-button cancel close-modal">إلغاء</button>
                 <button class="modal-button primary" id="upload-files-btn">رفع</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تصدير المشروع -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تصدير المشروع</h2>
+                <i class="fas fa-times close-modal"></i>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>اسم الملف المضغوط:</label>
+                    <input type="text" id="export-file-name" class="form-control" value="my-project.zip">
+                </div>
+                <div class="form-group">
+                    <label>خيارات التصدير:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="export-include-all" checked>
+                        <label for="export-include-all">تضمين جميع الملفات والمجلدات</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="export-minify">
+                        <label for="export-minify">تصغير ملفات CSS و JavaScript</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel close-modal">إلغاء</button>
+                <button class="modal-button primary" id="export-project-btn">تصدير</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال اختيار مجلد الوجهة -->
+    <div class="modal" id="folder-select-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>اختر المجلد الوجهة</h2>
+                <i class="fas fa-times close-modal"></i>
+            </div>
+            <div class="modal-body">
+                <div class="folder-tree" id="folder-tree">
+                    <!-- هنا ستظهر شجرة المجلدات -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button cancel close-modal">إلغاء</button>
+                <button class="modal-button primary" id="select-folder-btn">اختيار</button>
             </div>
         </div>
     </div>
@@ -592,915 +407,60 @@
             <i class="fas fa-edit"></i>
             إعادة تسمية
         </div>
+        <div class="context-menu-item" data-action="duplicate">
+            <i class="fas fa-copy"></i>
+            نسخ
+        </div>
         <div class="context-menu-item" data-action="delete">
             <i class="fas fa-trash-alt"></i>
             حذف
         </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="copy-path">
+            <i class="fas fa-clipboard"></i>
+            نسخ المسار
+        </div>
+        <div class="context-menu-item" data-action="download">
+            <i class="fas fa-download"></i>
+            تنزيل
+        </div>
     </div>
 
-    <script>
-        // النظام الملفي الافتراضي
-        const fileSystem = {
-            root: {
-                type: 'folder',
-                name: 'المجلد الرئيسي',
-                children: {
-                    'index.html': {
-                        type: 'file',
-                        fileType: 'html',
-                        content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>مرحباً بالعالم</title>\n    <link rel="stylesheet" href="styles.css">\n</head>\n<body>\n    <h1>مرحباً بالعالم!</h1>\n    <p>هذا هو مشروعي الأول.</p>\n    \n    <script src="script.js"><\/script>\n</body>\n</html>'
-                    },
-                    'styles.css': {
-                        type: 'file',
-                        fileType: 'css',
-                        content: 'body {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 20px;\n    background-color: #f5f5f5;\n}\n\nh1 {\n    color: #333;\n    text-align: center;\n}\n\np {\n    color: #666;\n    text-align: center;\n}'
-                    },
-                    'script.js': {
-                        type: 'file',
-                        fileType: 'js',
-                        content: '// هذا ملف جافا سكريبت\nconsole.log("مرحباً من جافا سكريبت!");\n\ndocument.addEventListener("DOMContentLoaded", function() {\n    console.log("تم تحميل الصفحة بالكامل!");\n});'
-                    },
-                    'مشروع-جديد': {
-                        type: 'folder',
-                        name: 'مشروع جديد',
-                        children: {
-                            'index.html': {
-                                type: 'file',
-                                fileType: 'html',
-                                content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>مشروع جديد</title>\n</head>\n<body>\n    <h1>مشروع جديد</h1>\n</body>\n</html>'
-                            }
-                        }
-                    }
-                }
-            }
-        };
+    <!-- قائمة سياق المحرر -->
+    <div class="editor-context-menu" id="editor-context-menu">
+        <div class="context-menu-item" data-action="cut">
+            <i class="fas fa-cut"></i>
+            قص
+        </div>
+        <div class="context-menu-item" data-action="copy">
+            <i class="fas fa-copy"></i>
+            نسخ
+        </div>
+        <div class="context-menu-item" data-action="paste">
+            <i class="fas fa-paste"></i>
+            لصق
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="select-all">
+            <i class="fas fa-check-double"></i>
+            تحديد الكل
+        </div>
+        <div class="context-menu-item" data-action="find">
+            <i class="fas fa-search"></i>
+            بحث
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="format-code">
+            <i class="fas fa-align-left"></i>
+            تنسيق الكود
+        </div>
+    </div>
 
-        // المسار الحالي
-        let currentPath = ['root'];
-        
-        // الملفات المفتوحة وحالتها
-        const openFiles = {};
-        let activeFile = null;
+    <!-- التنبيه -->
+    <div class="toast-container" id="toast-container">
+        <!-- ستضاف التنبيهات هنا -->
+    </div>
 
-        // تهيئة محرر الأكواد
-        const editor = ace.edit("editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.session.setMode("ace/mode/html");
-        editor.setOptions({
-            fontSize: "14px",
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true
-        });
-
-        // مؤشر تغيير موضع المؤشر
-        editor.session.selection.on('changeCursor', function() {
-            const cursorPosition = editor.selection.getCursor();
-            document.getElementById('cursor-position').textContent = `السطر: ${cursorPosition.row + 1}، العمود: ${cursorPosition.column + 1}`;
-        });
-
-        // مؤشر تغيير محتوى المحرر
-        editor.session.on('change', function() {
-            if (activeFile) {
-                openFiles[activeFile].isDirty = true;
-                updateTabStatus(activeFile);
-            }
-        });
-
-        // تحديث حالة التبويب (علامة التعديل)
-        function updateTabStatus(filePath) {
-            const file = openFiles[filePath];
-            const tabElement = document.querySelector(`.tab[data-path="${filePath}"]`);
-            
-            if (tabElement) {
-                if (file.isDirty) {
-                    if (!tabElement.querySelector('.dirty-indicator')) {
-                        const indicator = document.createElement('span');
-                        indicator.className = 'dirty-indicator';
-                        indicator.textContent = ' *';
-                        tabElement.insertBefore(indicator, tabElement.querySelector('.close-btn'));
-                    }
-                } else {
-                    const indicator = tabElement.querySelector('.dirty-indicator');
-                    if (indicator) {
-                        indicator.remove();
-                    }
-                }
-            }
-        }
-
-        // وظيفة لإعادة رسم مستكشف الملفات
-        function renderFileBrowser() {
-            const fileBrowser = document.getElementById('file-browser');
-            fileBrowser.innerHTML = '';
-            
-            // وظيفة متداخلة لعرض المجلدات والملفات بشكل متكرر
-            function renderFolder(folderObj, pathArray, containerElement) {
-                // إنشاء عنصر المجلد
-                const folderElement = document.createElement('div');
-                folderElement.className = 'folder';
-                folderElement.setAttribute('data-path', pathArray.join('/'));
-                
-                // عنوان المجلد
-                const folderTitleElement = document.createElement('div');
-                folderTitleElement.className = 'folder-title';
-                folderTitleElement.innerHTML = `<i class="fas fa-folder"></i>${folderObj.name || pathArray[pathArray.length - 1]}`;
-                folderElement.appendChild(folderTitleElement);
-                
-                // توسيع/طي المجلد عند النقر
-                folderTitleElement.addEventListener('click', function(e) {
-                    folderElement.classList.toggle('open');
-                    e.stopPropagation();
-                });
-                
-                // معالجة النقر بالزر الأيمن على المجلد
-                folderTitleElement.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                    showContextMenu(e, pathArray.join('/'), 'folder');
-                });
-                
-                // محتوى المجلد
-                const folderContentElement = document.createElement('div');
-                folderContentElement.className = 'folder-content';
-                folderElement.appendChild(folderContentElement);
-                
-                // إضافة المجلد إلى الحاوية
-                containerElement.appendChild(folderElement);
-                
-                // استدعاء متكرر لعرض محتويات المجلد
-                if (folderObj.children) {
-                    const sortedItems = [];
-                    
-                    // فرز العناصر (المجلدات أولاً ثم الملفات)
-                    for (const itemName in folderObj.children) {
-                        const item = folderObj.children[itemName];
-                        sortedItems.push({
-                            name: itemName,
-                            type: item.type,
-                            object: item
-                        });
-                    }
-                    
-                    sortedItems.sort((a, b) => {
-                        if (a.type === b.type) {
-                            return a.name.localeCompare(b.name);
-                        }
-                        return a.type === 'folder' ? -1 : 1;
-                    });
-                    
-                    // عرض العناصر المفروزة
-                    sortedItems.forEach(item => {
-                        const newPath = [...pathArray, item.name];
-                        
-                        if (item.type === 'folder') {
-                            renderFolder(item.object, newPath, folderContentElement);
-                        } else {
-                            // إنشاء عنصر الملف
-                            const fileElement = document.createElement('div');
-                            fileElement.className = `file ${item.object.fileType}-file`;
-                            fileElement.setAttribute('data-path', newPath.join('/'));
-                            
-                            let icon;
-                            switch (item.object.fileType) {
-                                case 'html':
-                                    icon = 'html5';
-                                    break;
-                                case 'css':
-                                    icon = 'css3-alt';
-                                    break;
-                                case 'js':
-                                    icon = 'js';
-                                    break;
-                                default:
-                                    icon = 'file-alt';
-                            }
-                            
-                            fileElement.innerHTML = `<i class="fab fa-${icon}"></i>${item.name}`;
-                            
-                            // فتح الملف عند النقر
-                            fileElement.addEventListener('click', function() {
-                                openFile(newPath.join('/'));
-                            });
-                            
-                            // معالجة النقر بالزر الأيمن على الملف
-                            fileElement.addEventListener('contextmenu', function(e) {
-                                e.preventDefault();
-                                showContextMenu(e, newPath.join('/'), 'file');
-                            });
-                            
-                            folderContentElement.appendChild(fileElement);
-                        }
-                    });
-                }
-            }
-            
-            // بدء العرض من المجلد الجذر
-            renderFolder(fileSystem.root, ['root'], fileBrowser);
-            
-            // فتح المجلد الرئيسي افتراضياً
-            const rootFolder = document.querySelector('.folder[data-path="root"]');
-            if (rootFolder) {
-                rootFolder.classList.add('open');
-            }
-        }
-
-        // وظيفة للحصول على كائن من النظام الملفي باستخدام المسار
-        function getFileSystemObjectByPath(path) {
-            const pathArray = path.split('/');
-            let current = fileSystem;
-            
-            for (let i = 0; i < pathArray.length; i++) {
-                const segment = pathArray[i];
-                
-                if (i === 0 && segment === 'root') {
-                    current = current.root;
-                } else {
-                    if (current.children && current.children[segment]) {
-                        current = current.children[segment];
-                    } else {
-                        return null;
-                    }
-                }
-            }
-            
-            return current;
-        }
-
-        // وظيفة للحصول على اسم الملف من المسار
-        function getFilenameFromPath(path) {
-            const pathArray = path.split('/');
-            return pathArray[pathArray.length - 1];
-        }
-
-        // وظيفة لإضافة تبويب جديد
-        function addTab(filePath) {
-            const tabsContainer = document.getElementById('tabs');
-            const filename = getFilenameFromPath(filePath);
-            const fileObj = getFileSystemObjectByPath(filePath);
-            
-            // إنشاء عنصر التبويب
-            const tabElement = document.createElement('div');
-            tabElement.className = 'tab';
-            tabElement.setAttribute('data-path', filePath);
-            
-            // أيقونة نوع الملف
-            let icon;
-            switch (fileObj.fileType) {
-                case 'html':
-                    icon = 'html5';
-                    break;
-                case 'css':
-                    icon = 'css3-alt';
-                    break;
-                case 'js':
-                    icon = 'js';
-                    break;
-                default:
-                    icon = 'file-alt';
-            }
-            
-            tabElement.innerHTML = `
-                <i class="fab fa-${icon} file-type"></i>
-                <span>${filename}</span>
-                <i class="fas fa-times close-btn"></i>
-            `;
-            
-            // معالجة النقر على التبويب
-            tabElement.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('close-btn')) {
-                    activateTab(filePath);
-                }
-            });
-            
-            // معالجة زر الإغلاق
-            tabElement.querySelector('.close-btn').addEventListener('click', function(e) {
-                closeFile(filePath);
-                e.stopPropagation();
-            });
-            
-            tabsContainer.appendChild(tabElement);
-        }
-
-        // وظيفة لتنشيط تبويب
-        function activateTab(filePath) {
-            // إزالة الصنف النشط من جميع التبويبات
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // إضافة الصنف النشط للتبويب المحدد
-            const tabElement = document.querySelector(`.tab[data-path="${filePath}"]`);
-            if (tabElement) {
-                tabElement.classList.add('active');
-            }
-            
-            // تحديث الملف النشط
-            activeFile = filePath;
-            
-            // تحديث المحرر
-            const file = openFiles[filePath];
-            if (file) {
-                // تحديث وضع المحرر حسب نوع الملف
-                const fileObj = getFileSystemObjectByPath(filePath);
-                if (fileObj) {
-                    switch (fileObj.fileType) {
-                        case 'html':
-                            editor.session.setMode("ace/mode/html");
-                            document.getElementById('language-indicator').textContent = 'لغة: HTML';
-                            break;
-                        case 'css':
-                            editor.session.setMode("ace/mode/css");
-                            document.getElementById('language-indicator').textContent = 'لغة: CSS';
-                            break;
-                        case 'js':
-                            editor.session.setMode("ace/mode/javascript");
-                            document.getElementById('language-indicator').textContent = 'لغة: JavaScript';
-                            break;
-                        default:
-                            editor.session.setMode("ace/mode/text");
-                            document.getElementById('language-indicator').textContent = 'لغة: نص عادي';
-                    }
-                }
-                
-                // تحديث محتوى المحرر
-                editor.setValue(file.content);
-                editor.clearSelection();
-                
-                // إظهار المحرر وإخفاء الشاشة الترحيبية
-                document.querySelector('.no-file-opened').style.display = 'none';
-                document.getElementById('editor').style.display = 'block';
-            }
-        }
-
-        // وظيفة لفتح ملف
-        function openFile(filePath) {
-            const fileObj = getFileSystemObjectByPath(filePath);
-            
-            if (!fileObj || fileObj.type !== 'file') {
-                console.error('الملف غير موجود أو ليس ملفًا صالحًا');
-                return;
-            }
-            
-            // تحقق مما إذا كان الملف مفتوحًا بالفعل
-            if (!openFiles[filePath]) {
-                // إضافة الملف إلى قائمة الملفات المفتوحة
-                openFiles[filePath] = {
-                    content: fileObj.content,
-                    isDirty: false
-                };
-                
-                // إضافة تبويب جديد
-                addTab(filePath);
-            }
-            
-            // تنشيط التبويب
-            activateTab(filePath);
-        }
-
-        // وظيفة لإغلاق ملف
-        function closeFile(filePath) {
-            const file = openFiles[filePath];
-            
-            if (file && file.isDirty) {
-                // إذا تم تعديل الملف، يمكن إضافة تنبيه هنا
-                if (!confirm('هل تريد إغلاق الملف بدون حفظ التغييرات؟')) {
-                    return;
-                }
-            }
-            
-            // إزالة التبويب
-            const tabElement = document.querySelector(`.tab[data-path="${filePath}"]`);
-            if (tabElement) {
-                tabElement.remove();
-            }
-            
-            // إزالة الملف من قائمة الملفات المفتوحة
-            delete openFiles[filePath];
-            
-            // إذا كان هذا هو الملف النشط، قم بتنشيط ملف آخر أو إظهار الشاشة الترحيبية
-            if (activeFile === filePath) {
-                const remainingTabs = document.querySelectorAll('.tab');
-                if (remainingTabs.length > 0) {
-                    const newPath = remainingTabs[remainingTabs.length - 1].getAttribute('data-path');
-                    activateTab(newPath);
-                } else {
-                    activeFile = null;
-                    document.querySelector('.no-file-opened').style.display = 'flex';
-                    document.getElementById('editor').style.display = 'none';
-                }
-            }
-        }
-
-        // وظيفة لحفظ الملف النشط
-        function saveActiveFile() {
-            if (!activeFile) {
-                return;
-            }
-            
-            const fileObj = getFileSystemObjectByPath(activeFile);
-            if (!fileObj) {
-                return;
-            }
-            
-            // الحصول على المحتوى من المحرر
-            const content = editor.getValue();
-            
-            // تحديث النظام الملفي
-            fileObj.content = content;
-            
-            // تحديث حالة الملف المفتوح
-            openFiles[activeFile].content = content;
-            openFiles[activeFile].isDirty = false;
-            
-            // تحديث التبويب
-            updateTabStatus(activeFile);
-        }
-
-        // وظيفة لتشغيل الصفحة الرئيسية
-        function runApplication() {
-            // البحث عن index.html في المجلد الجذر أو الملف النشط
-            let htmlFilePath;
-            
-            if (activeFile && activeFile.endsWith('.html')) {
-                htmlFilePath = activeFile;
-            } else {
-                htmlFilePath = 'root/index.html';
-            }
-            
-            const htmlFile = getFileSystemObjectByPath(htmlFilePath);
-            
-            if (!htmlFile) {
-                alert('لم يتم العثور على ملف HTML لتشغيله.');
-                return;
-            }
-            
-            // إذا كان الملف مفتوحًا ومعدلًا، استخدم المحتوى من المحرر
-            let htmlContent;
-            if (openFiles[htmlFilePath] && openFiles[htmlFilePath].isDirty) {
-                if (activeFile === htmlFilePath) {
-                    htmlContent = editor.getValue();
-                } else {
-                    htmlContent = openFiles[htmlFilePath].content;
-                }
-            } else {
-                htmlContent = htmlFile.content;
-            }
-            
-            // استبدال الروابط الخارجية بالمحتوى الفعلي
-            htmlContent = processHtmlForPreview(htmlContent, htmlFilePath);
-            
-            // عرض معاينة الصفحة
-            showPreview(htmlContent);
-        }
-
-        // معالجة الروابط في ملف HTML للمعاينة
-        function processHtmlForPreview(htmlContent, htmlFilePath) {
-            const pathParts = htmlFilePath.split('/');
-            pathParts.pop(); // إزالة اسم الملف
-            const basePath = pathParts.join('/');
-            
-            // استبدال روابط CSS
-            htmlContent = htmlContent.replace(/<link[^>]*href=["']([^"']+)["'][^>]*>/gi, function(match, href) {
-                if (href.startsWith('http') || href.startsWith('//')) {
-                    return match; // ترك الروابط الخارجية كما هي
-                }
-                
-                const cssPath = resolvePath(basePath, href);
-                const cssFile = getFileSystemObjectByPath(cssPath);
-                
-                if (cssFile) {
-                    // استخدام المحتوى من الملفات المفتوحة إذا كان معدلًا
-                    let cssContent;
-                    if (openFiles[cssPath] && openFiles[cssPath].isDirty) {
-                        cssContent = openFiles[cssPath].content;
-                    } else {
-                        cssContent = cssFile.content;
-                    }
-                    
-                    return `<style>${cssContent}</style>`;
-                }
-                
-                return match;
-            });
-            
-            // استبدال روابط JavaScript
-            htmlContent = htmlContent.replace(/<script[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi, function(match, src) {
-                if (src.startsWith('http') || src.startsWith('//')) {
-                    return match; // ترك الروابط الخارجية كما هي
-                }
-                
-                const jsPath = resolvePath(basePath, src);
-                const jsFile = getFileSystemObjectByPath(jsPath);
-                
-                if (jsFile) {
-                    // استخدام المحتوى من الملفات المفتوحة إذا كان معدلًا
-                    let jsContent;
-                    if (openFiles[jsPath] && openFiles[jsPath].isDirty) {
-                        jsContent = openFiles[jsPath].content;
-                    } else {
-                        jsContent = jsFile.content;
-                    }
-                    
-                    return `<script>${jsContent}<\/script>`;
-                }
-                
-                return match;
-            });
-            
-            return htmlContent;
-        }
-
-        // حل المسار النسبي
-        function resolvePath(basePath, relativePath) {
-            // إزالة ./ من بداية المسار النسبي
-            if (relativePath.startsWith('./')) {
-                relativePath = relativePath.substring(2);
-            }
-            
-            // معالجة ../
-            const baseSegments = basePath.split('/');
-            const relativeSegments = relativePath.split('/');
-            
-            while (relativeSegments.length > 0 && relativeSegments[0] === '..') {
-                relativeSegments.shift();
-                baseSegments.pop();
-            }
-            
-            return [...baseSegments, ...relativeSegments].join('/');
-        }
-
-        // عرض معاينة الصفحة
-        function showPreview(htmlContent) {
-            const previewContainer = document.getElementById('preview-container');
-            const editorContainer = document.getElementById('editor-container');
-            const iframe = document.getElementById('preview-iframe');
-            
-            // إظهار الحاوية
-            previewContainer.style.display = 'block';
-            editorContainer.style.display = 'none';
-            
-            // تحديث محتوى الـ iframe
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            iframeDoc.open();
-            iframeDoc.write(htmlContent);
-            iframeDoc.close();
-            
-            // إضافة زر العودة إلى المحرر
-            if (!document.getElementById('back-to-editor-btn')) {
-                const backButton = document.createElement('button');
-                backButton.id = 'back-to-editor-btn';
-                backButton.className = 'run-button';
-                backButton.innerHTML = '<i class="fas fa-arrow-left"></i> العودة إلى المحرر';
-                backButton.style.position = 'absolute';
-                backButton.style.top = '10px';
-                backButton.style.right = '10px';
-                backButton.style.zIndex = '100';
-                
-                backButton.addEventListener('click', function() {
-                    previewContainer.style.display = 'none';
-                    editorContainer.style.display = 'block';
-                    this.remove();
-                });
-                
-                previewContainer.appendChild(backButton);
-            }
-        }
-
-        // وظيفة لعرض قائمة السياق
-        function showContextMenu(event, path, type) {
-            const contextMenu = document.getElementById('context-menu');
-            
-            // تحديد العناصر التي ستظهر في القائمة حسب النوع
-            document.querySelectorAll('.context-menu-item').forEach(item => {
-                const action = item.getAttribute('data-action');
-                
-                if (type === 'file' && (action === 'new-file' || action === 'new-folder')) {
-                    item.style.display = 'none';
-                } else {
-                    item.style.display = 'flex';
-                }
-            });
-            
-            // وضع القائمة
-            contextMenu.style.left = `${event.pageX}px`;
-            contextMenu.style.top = `${event.pageY}px`;
-            contextMenu.style.display = 'block';
-            
-            // تخزين معلومات العنصر المحدد
-            contextMenu.setAttribute('data-target-path', path);
-            contextMenu.setAttribute('data-target-type', type);
-            
-            // إضافة مستمع لإخفاء القائمة عند النقر في أي مكان آخر
-            window.addEventListener('click', hideContextMenu);
-            window.addEventListener('contextmenu', hideContextMenu);
-        }
-
-        // وظيفة لإخفاء قائمة السياق
-        function hideContextMenu() {
-            const contextMenu = document.getElementById('context-menu');
-            contextMenu.style.display = 'none';
-            
-            // إزالة المستمعين
-            window.removeEventListener('click', hideContextMenu);
-            window.removeEventListener('contextmenu', hideContextMenu);
-        }
-
-        // وظيفة لإنشاء ملف جديد
-        function createNewFile(parentPath, fileName, fileType) {
-            const parentFolder = getFileSystemObjectByPath(parentPath);
-            
-            if (!parentFolder || parentFolder.type !== 'folder') {
-                alert('المجلد الأب غير صالح');
-                return;
-            }
-            
-            // التحقق من وجود الملف
-            if (parentFolder.children[fileName]) {
-                alert('الملف موجود بالفعل');
-                return;
-            }
-            
-            // إنشاء محتوى افتراضي حسب نوع الملف
-            let defaultContent = '';
-            
-            switch (fileType) {
-                case 'html':
-                    defaultContent = '<!DOCTYPE html>\n<html>\n<head>\n    <title>صفحة جديدة</title>\n</head>\n<body>\n    <h1>مرحباً بالعالم!</h1>\n</body>\n</html>';
-                    break;
-                case 'css':
-                    defaultContent = '/* أنماط CSS */\nbody {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 20px;\n}';
-                    break;
-                case 'js':
-                    defaultContent = '// كود جافا سكريبت\nconsole.log("مرحباً من جافا سكريبت!");';
-                    break;
-            }
-            
-            // إضافة الملف إلى النظام الملفي
-            parentFolder.children[fileName] = {
-                type: 'file',
-                fileType: fileType,
-                content: defaultContent
-            };
-            
-            // إعادة رسم مستكشف الملفات
-            renderFileBrowser();
-            
-            // فتح الملف الجديد
-            openFile(`${parentPath}/${fileName}`);
-        }
-
-        // وظيفة لإنشاء مجلد جديد
-        function createNewFolder(parentPath, folderName) {
-            const parentFolder = getFileSystemObjectByPath(parentPath);
-            
-            if (!parentFolder || parentFolder.type !== 'folder') {
-                alert('المجلد الأب غير صالح');
-                return;
-            }
-            
-            // التحقق من وجود المجلد
-            if (parentFolder.children[folderName]) {
-                alert('المجلد موجود بالفعل');
-                return;
-            }
-            
-            // إضافة المجلد إلى النظام الملفي
-            parentFolder.children[folderName] = {
-                type: 'folder',
-                name: folderName,
-                children: {}
-            };
-            
-            // إعادة رسم مستكشف الملفات
-            renderFileBrowser();
-            
-            // فتح المجلد الجديد
-            const folderElement = document.querySelector(`.folder[data-path="${parentPath}/${folderName}"]`);
-            if (folderElement) {
-                folderElement.classList.add('open');
-            }
-        }
-
-        // وظيفة لمعالجة رفع الملفات
-        function handleFileUpload(files, parentPath) {
-            const parentFolder = getFileSystemObjectByPath(parentPath);
-            
-            if (!parentFolder || parentFolder.type !== 'folder') {
-                alert('المجلد الأب غير صالح');
-                return;
-            }
-            
-            // معالجة كل ملف
-            Array.from(files).forEach(file => {
-                const fileName = file.name;
-                const fileExtension = fileName.split('.').pop().toLowerCase();
-                
-                // تحديد نوع الملف
-                let fileType = 'txt';
-                if (fileExtension === 'html' || fileExtension === 'htm') {
-                    fileType = 'html';
-                } else if (fileExtension === 'css') {
-                    fileType = 'css';
-                } else if (fileExtension === 'js') {
-                    fileType = 'js';
-                }
-                
-                // قراءة محتوى الملف
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // إضافة الملف إلى النظام الملفي
-                    parentFolder.children[fileName] = {
-                        type: 'file',
-                        fileType: fileType,
-                        content: e.target.result
-                    };
-                    
-                    // إعادة رسم مستكشف الملفات
-                    renderFileBrowser();
-                };
-                
-                reader.readAsText(file);
-            });
-        }
-
-        // وظيفة لحذف ملف أو مجلد
-        function deleteFileOrFolder(path) {
-            const pathArray = path.split('/');
-            const itemName = pathArray.pop();
-            const parentPath = pathArray.join('/');
-            
-            const parentFolder = getFileSystemObjectByPath(parentPath);
-            
-            if (!parentFolder || parentFolder.type !== 'folder' || !parentFolder.children[itemName]) {
-                alert('العنصر غير موجود');
-                return;
-            }
-            
-            // التحقق مما إذا كان الملف مفتوحًا
-            if (openFiles[path]) {
-                closeFile(path);
-            }
-            
-            // حذف العنصر
-            delete parentFolder.children[itemName];
-            
-            // إعادة رسم مستكشف الملفات
-            renderFileBrowser();
-        }
-
-        // معالجة النقر على عناصر قائمة السياق
-        document.querySelectorAll('.context-menu-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const action = this.getAttribute('data-action');
-                const contextMenu = document.getElementById('context-menu');
-                const targetPath = contextMenu.getAttribute('data-target-path');
-                const targetType = contextMenu.getAttribute('data-target-type');
-                
-                switch (action) {
-                    case 'new-file':
-                        // عرض مودال إنشاء ملف جديد
-                        document.getElementById('new-file-modal').style.display = 'flex';
-                        document.getElementById('new-file-name').value = '';
-                        document.getElementById('new-file-modal').setAttribute('data-parent-path', targetPath);
-                        break;
-                        
-                    case 'new-folder':
-                        // عرض مودال إنشاء مجلد جديد
-                        document.getElementById('new-folder-modal').style.display = 'flex';
-                        document.getElementById('new-folder-name').value = '';
-                        document.getElementById('new-folder-modal').setAttribute('data-parent-path', targetPath);
-                        break;
-                        
-                    case 'rename':
-                        // ليس مطبقًا في هذا المثال
-                        break;
-                        
-                    case 'delete':
-                        if (confirm('هل أنت متأكد من أنك تريد حذف هذا العنصر؟')) {
-                            deleteFileOrFolder(targetPath);
-                        }
-                        break;
-                }
-                
-                hideContextMenu();
-            });
-        });
-
-        // معالجة النقر على زر إنشاء ملف جديد
-        document.querySelector('.new-file-btn').addEventListener('click', function() {
-            document.getElementById('new-file-modal').style.display = 'flex';
-            document.getElementById('new-file-name').value = '';
-            document.getElementById('new-file-modal').setAttribute('data-parent-path', 'root');
-        });
-
-        // معالجة النقر على زر تشغيل
-        document.querySelector('.run-button').addEventListener('click', function() {
-            runApplication();
-        });
-
-        // معالجة النقر على زر رفع ملفات
-        document.querySelector('.upload-button').addEventListener('click', function() {
-            document.getElementById('upload-file-modal').style.display = 'flex';
-            document.getElementById('upload-file-input').value = '';
-            document.getElementById('upload-file-list').innerHTML = '';
-            document.getElementById('upload-file-modal').setAttribute('data-parent-path', 'root');
-        });
-
-        // معالجة النقر على زر إغلاق المودال
-        document.querySelectorAll('.close-modal').forEach(button => {
-            button.addEventListener('click', function() {
-                this.closest('.modal').style.display = 'none';
-            });
-        });
-
-        // معالجة النقر على زر إنشاء ملف
-        document.getElementById('create-file-btn').addEventListener('click', function() {
-            const modal = document.getElementById('new-file-modal');
-            const parentPath = modal.getAttribute('data-parent-path');
-            const fileName = document.getElementById('new-file-name').value.trim();
-            const fileType = document.getElementById('new-file-type').value;
-            
-            if (!fileName) {
-                alert('يرجى إدخال اسم للملف');
-                return;
-            }
-            
-            // إضافة امتداد الملف إذا لم يكن موجودًا
-            let finalFileName = fileName;
-            if (!finalFileName.includes('.')) {
-                finalFileName += `.${fileType}`;
-            }
-            
-            createNewFile(parentPath, finalFileName, fileType);
-            modal.style.display = 'none';
-        });
-
-        // معالجة النقر على زر إنشاء مجلد
-        document.getElementById('create-folder-btn').addEventListener('click', function() {
-            const modal = document.getElementById('new-folder-modal');
-            const parentPath = modal.getAttribute('data-parent-path');
-            const folderName = document.getElementById('new-folder-name').value.trim();
-            
-            if (!folderName) {
-                alert('يرجى إدخال اسم للمجلد');
-                return;
-            }
-            
-            createNewFolder(parentPath, folderName);
-            modal.style.display = 'none';
-        });
-
-        // معالجة تحديد الملفات للرفع
-        document.getElementById('upload-file-input').addEventListener('change', function() {
-            const fileList = document.getElementById('upload-file-list');
-            fileList.innerHTML = '';
-            
-            Array.from(this.files).forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.textContent = file.name;
-                fileList.appendChild(fileItem);
-            });
-        });
-
-        // معالجة النقر على زر رفع الملفات
-        document.getElementById('upload-files-btn').addEventListener('click', function() {
-            const modal = document.getElementById('upload-file-modal');
-            const parentPath = modal.getAttribute('data-parent-path');
-            const files = document.getElementById('upload-file-input').files;
-            
-            if (files.length === 0) {
-                alert('يرجى اختيار ملف واحد على الأقل');
-                return;
-            }
-            
-            handleFileUpload(files, parentPath);
-            modal.style.display = 'none';
-        });
-
-        // معالجة النقر على زر تبديل الشريط الجانبي
-        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('sidebar-collapsed');
-        });
-
-        // اختصارات لوحة المفاتيح
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+S لحفظ الملف
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveActiveFile();
-            }
-            
-            // Ctrl+R لتشغيل التطبيق
-            if (e.ctrlKey && e.key === 'r') {
-                e.preventDefault();
-                runApplication();
-            }
-        });
-
-        // تهيئة التطبيق
-        window.addEventListener('load', function() {
-            renderFileBrowser();
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
