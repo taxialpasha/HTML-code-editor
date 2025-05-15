@@ -1429,11 +1429,10 @@
                     <div class="tab" onclick="switchSettingsTab('investment')">الاستثمار</div>
                     <div class="tab" onclick="switchSettingsTab('profile')">الملف الشخصي</div>
                     <div class="tab" onclick="switchSettingsTab('notifications')">الإشعارات</div>
-                    <div class="tab" onclick="switchSettingsTab('backup')">النسخ الاحتياطي</div>
                     <div class="tab" onclick="switchSettingsTab('system')">النظام</div>
                     <div class="tab" onclick="switchSettingsTab('sync')">المزامنة والنسخ الاحتياطي</div>
                 </div>
-<div class="tab" onclick="switchSettingsTab('fullBackup')">النسخ الاحتياطي الشامل</div>
+
                 <div id="generalSettings" class="settings-tab-content active">
                     <div class="form-container">
                         <div class="form-header">
@@ -1702,68 +1701,7 @@
                     </div>
                 </div>
 
-                <div id="backupSettings" class="settings-tab-content">
-                    <div class="form-container">
-                        <div class="form-header">
-                            <h2 class="form-title">النسخ الاحتياطي واستعادة البيانات</h2>
-                            <p class="form-subtitle">إدارة البيانات والنسخ الاحتياطي</p>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">إنشاء نسخة احتياطية</label>
-                                <button class="btn btn-primary" onclick="createBackup()">
-                                    <i class="fas fa-download"></i> إنشاء نسخة احتياطية
-                                </button>
-                                <p class="form-text">قم بإنشاء نسخة احتياطية كاملة من جميع بيانات النظام.</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">استعادة من نسخة احتياطية</label>
-                                <input type="file" class="form-control" id="restoreFile" accept=".json">
-                                <button class="btn btn-warning" onclick="restoreBackup()" style="margin-top: 10px;">
-                                    <i class="fas fa-upload"></i> استعادة
-                                </button>
-                                <p class="form-text">تحذير: سيتم استبدال جميع البيانات الحالية بالبيانات من النسخة
-                                    الاحتياطية.</p>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">النسخ الاحتياطية السابقة</label>
-                                <select class="form-select" id="previousBackups" size="5" style="height: auto;">
-                                    <!-- Will be populated by JavaScript -->
-                                </select>
-                                <div style="margin-top: 10px;">
-                                    <button class="btn btn-light btn-sm" onclick="downloadSelectedBackup()">
-                                        <i class="fas fa-download"></i> تنزيل
-                                    </button>
-                                    <button class="btn btn-light btn-sm" onclick="restoreSelectedBackup()">
-                                        <i class="fas fa-upload"></i> استعادة
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteSelectedBackup()">
-                                        <i class="fas fa-trash"></i> حذف
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">تصدير البيانات</label>
-                            <div class="form-row">
-                                <button class="btn btn-light" onclick="exportInvestors()">
-                                    <i class="fas fa-file-export"></i> المستثمرين
-                                </button>
-                                <button class="btn btn-light" onclick="exportInvestments()">
-                                    <i class="fas fa-file-export"></i> الاستثمارات
-                                </button>
-                                <button class="btn btn-light" onclick="exportOperations()">
-                                    <i class="fas fa-file-export"></i> العمليات
-                                </button>
-                                <button class="btn btn-light" onclick="exportReports()">
-                                    <i class="fas fa-file-export"></i> التقارير
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            
 
                 <div id="systemSettings" class="settings-tab-content">
                     <!-- System Settings Content -->
@@ -1977,255 +1915,6 @@
                             <i class="fas fa-save"></i> حفظ الإعدادات
                         </button>
                     </div>
-                    
-                    
-
-<!-- إضافة محتوى التبويب -->
-<div id="fullBackupSettings" class="settings-tab-content">
-    <div class="form-container">
-        <div class="form-header">
-            <h2 class="form-title">النسخ الاحتياطي الشامل</h2>
-            <p class="form-subtitle">إنشاء واستعادة نسخة احتياطية كاملة لجميع بيانات التطبيق</p>
-        </div>
-        
-        <div class="dashboard-cards" style="margin-bottom: 30px;">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">إجمالي المستثمرين</div>
-                        <div class="card-value" id="backupInvestorsCount">0</div>
-                    </div>
-                    <div class="card-icon primary">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">إجمالي الاستثمارات</div>
-                        <div class="card-value" id="backupInvestmentsCount">0</div>
-                    </div>
-                    <div class="card-icon success">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">إجمالي العمليات</div>
-                        <div class="card-value" id="backupOperationsCount">0</div>
-                    </div>
-                    <div class="card-icon warning">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">آخر نسخة احتياطية</div>
-                        <div class="card-value" id="lastFullBackupDate">لا يوجد</div>
-                    </div>
-                    <div class="card-icon info">
-                        <i class="fas fa-history"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <h3 class="form-subtitle">إنشاء نسخة احتياطية جديدة</h3>
-            <p class="form-text">سيتم إنشاء نسخة احتياطية كاملة لجميع بيانات التطبيق بما في ذلك المستثمرين والاستثمارات والعمليات والإعدادات.</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">اسم النسخة الاحتياطية (اختياري)</label>
-                    <input type="text" class="form-control" id="fullBackupName" placeholder="نسخة احتياطية شاملة">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">وصف النسخة الاحتياطية (اختياري)</label>
-                    <input type="text" class="form-control" id="fullBackupDescription" placeholder="وصف اختياري للنسخة الاحتياطية">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">صيغ التصدير</label>
-                <div class="form-row">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="exportJson" checked>
-                        <label class="form-check-label" for="exportJson">JSON (أساسي للاستعادة)</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="exportExcel" checked>
-                        <label class="form-check-label" for="exportExcel">Excel</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="exportPdf" checked>
-                        <label class="form-check-label" for="exportPdf">PDF</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="exportWord" checked>
-                        <label class="form-check-label" for="exportWord">Word</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">محتوى النسخة الاحتياطية</label>
-                <div class="form-row">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="backupInvestors" checked>
-                        <label class="form-check-label" for="backupInvestors">المستثمرين</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="backupInvestments" checked>
-                        <label class="form-check-label" for="backupInvestments">الاستثمارات</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="backupOperations" checked>
-                        <label class="form-check-label" for="backupOperations">العمليات</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="backupSettings" checked>
-                        <label class="form-check-label" for="backupSettings">الإعدادات</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="backupEvents" checked>
-                        <label class="form-check-label" for="backupEvents">الأحداث</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="backupNotifications" checked>
-                        <label class="form-check-label" for="backupNotifications">الإشعارات</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <button class="btn btn-primary btn-lg" onclick="createFullBackup()">
-                    <i class="fas fa-download"></i> إنشاء نسخة احتياطية شاملة
-                </button>
-                <div class="backup-progress" id="backupProgress" style="display: none; margin-top: 15px;">
-                    <div class="progress">
-                        <div class="progress-bar" id="backupProgressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                    </div>
-                    <p id="backupStatusText" style="margin-top: 5px; text-align: center;">جاري إنشاء النسخة الاحتياطية...</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <h3 class="form-subtitle">استعادة من نسخة احتياطية</h3>
-            <p class="form-text">استعادة بيانات التطبيق من نسخة احتياطية سابقة.</p>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">طريقة الاستعادة</label>
-                    <div class="form-row">
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="restoreMethodFile" name="restoreMethod" value="file" checked onchange="toggleRestoreMethod()">
-                            <label class="form-check-label" for="restoreMethodFile">استعادة من ملف</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="restoreMethodHistory" name="restoreMethod" value="history" onchange="toggleRestoreMethod()">
-                            <label class="form-check-label" for="restoreMethodHistory">استعادة من السجل</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="restoreFileSection">
-                <div class="form-group">
-                    <label class="form-label">ملف النسخة الاحتياطية (JSON)</label>
-                    <input type="file" class="form-control" id="fullRestoreFile" accept=".json">
-                    <small class="form-text" style="margin-top: 5px;">يجب اختيار ملف بصيغة JSON تم إنشاؤه بواسطة النظام.</small>
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-warning btn-lg" onclick="restoreFromFile()">
-                        <i class="fas fa-upload"></i> استعادة من ملف
-                    </button>
-                </div>
-            </div>
-            
-            <div id="restoreHistorySection" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">النسخ الاحتياطية السابقة</label>
-                    <select class="form-select" id="backupHistoryList" size="5" style="height: auto;">
-                        <!-- سيتم تعبئة القائمة بواسطة JavaScript -->
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <button class="btn btn-warning btn-lg" onclick="restoreFromHistory()">
-                        <i class="fas fa-history"></i> استعادة من السجل
-                    </button>
-                </div>
-            </div>
-            
-            <div class="form-group" style="margin-top: 10px;">
-                <div class="alert alert-warning">
-                    <div class="alert-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <div class="alert-title">تنبيه هام</div>
-                        <div class="alert-text">سيتم استبدال جميع البيانات الحالية بالبيانات من النسخة الاحتياطية. يرجى التأكد من عمل نسخة احتياطية من البيانات الحالية قبل الاستعادة.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <h3 class="form-subtitle">سجل النسخ الاحتياطية</h3>
-            <p class="form-text">قائمة بجميع النسخ الاحتياطية التي تم إنشاؤها.</p>
-            
-            <div class="table-container" style="box-shadow: var(--box-shadow); margin-bottom: 20px;">
-                <div class="table-header">
-                    <div class="table-title">النسخ الاحتياطية السابقة</div>
-                    <button class="btn btn-sm btn-light" onclick="refreshBackupHistory()">
-                        <i class="fas fa-sync"></i> تحديث
-                    </button>
-                </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>الاسم</th>
-                            <th>التاريخ</th>
-                            <th>الحجم</th>
-                            <th>المحتوى</th>
-                            <th>إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="backupHistoryTableBody">
-                        <!-- سيتم تعبئة الجدول بواسطة JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">مجلد النسخ الاحتياطية</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="backupFolderPath" value="./backups" readonly>
-                    <button class="btn btn-light" type="button" onclick="changeBackupFolder()">
-                        <i class="fas fa-folder-open"></i> تغيير
-                    </button>
-                </div>
-                <small class="form-text" style="margin-top: 5px;">سيتم حفظ النسخ الاحتياطية في هذا المجلد. تأكد من وجود صلاحيات الكتابة.</small>
-            </div>
-            
-            <div class="form-group">
-                <button class="btn btn-light" onclick="openBackupFolder()">
-                    <i class="fas fa-folder-open"></i> فتح مجلد النسخ الاحتياطية
-                </button>
-                <button class="btn btn-danger" onclick="clearBackupHistory()">
-                    <i class="fas fa-trash"></i> مسح السجل
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
                 </div>
             </div>
         </div>
@@ -2844,7 +2533,7 @@
     </div>
     <script src="chart-utils.js"></script>
     <script src="app.js"></script>
-    <script src="backup-restore-enhanced.js"></script>
+   
 
     <script src="settings-fix.js"></script>
     <script src="firebase-integration.js"></script>
@@ -2885,10 +2574,10 @@
 <script src="notification2-integration.js"></script>
 <script src="notification-search-fixed.js"></script>
 
-<script src="Backup.js"></script>
 
-
-
+<link rel="stylesheet" href="comprehensive-backup-styles.css">
+<script src="comprehensive-backup.js"></script>
+<script src="backup-reports.js"></script>
 
 
 
